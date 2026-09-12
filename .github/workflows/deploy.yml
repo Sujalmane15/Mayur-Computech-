@@ -44,11 +44,23 @@ jobs:
               *) cp -r "$f" dist/ 2>/dev/null || true ;;
             esac
           done
+          # Vite serves public/* at the site root (e.g. public/hero-student.jpg
+          # is fetched as ./hero-student.jpg). The static copy above preserves
+          # public/ as a subfolder, so flatten it to match dev behaviour.
+          if [ -d public ]; then
+            cp -rn public/* dist/ 2>/dev/null || true
+          fi
           # Fail loudly if the entry point is missing
           test -f dist/index.html || (echo "ERROR: index.html missing from artifact" && exit 1)
           test -f dist/script.js || (echo "ERROR: script.js missing from artifact" && exit 1)
           test -f dist/styles.css || (echo "ERROR: styles.css missing from artifact" && exit 1)
+          # Warn (not fail) about referenced local images missing from dist/
+          echo "--- dist contents ---"
           ls dist
+          echo "--- image check ---"
+          for img in mayur-computech-logo.svg hero-student.jpg gallery-lab.jpg gallery-typing.jpg gallery-cert.jpg gallery-mentor.jpg gallery-coding.jpg gallery-campus.jpg; do
+            if [ -f "dist/$img" ]; then echo "OK: $img"; else echo "WARN: $img missing in dist/ (check public/ or repo root)"; fi
+          done
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
