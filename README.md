@@ -2,7 +2,7 @@
 
 Website for Mayur Computech.
 
-Live website: **https://Sujalmane15.github.io/Mayur-Computech/** 🚀
+Live website: **https://sujalmane15.github.io/Mayur-Computech-/** 🚀
 
 ---
 
@@ -62,12 +62,12 @@ This repository is configured to deploy automatically to GitHub Pages using
 
 - The workflow runs on every **push to `main`**
 - Install dependencies → `npm run build` → deploy the `dist/` output
-- The site uses Vite's `base: '/Mayur-Computech/'` (matching the GitHub repo
-  `Sujalmane15/Mayur-Computech` — GitHub normalizes the trailing hyphen away)
+- The site uses Vite's `base: '/Mayur-Computech-/'` (matching the GitHub repo
+  `Sujalmane15/Mayur-Computech-` exactly)
   so all CSS, JavaScript and image paths resolve correctly under the
-  `/Mayur-Computech/` subpath
+  `/Mayur-Computech-/` subpath
 
-**Live URL:** https://Sujalmane15.github.io/Mayur-Computech/
+**Live URL:** https://sujalmane15.github.io/Mayur-Computech-/
 
 > GitHub Pages must be enabled once in the repository settings:
 > **Settings → Pages → Source: *GitHub Actions*** (never deploy from a branch).
