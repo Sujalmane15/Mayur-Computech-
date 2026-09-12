@@ -8,7 +8,7 @@ export default defineConfig(() => {
     // NOTE: the GitHub repo is "Sujalmane15/Mayur-Computech" — GitHub strips
     // the folder's trailing hyphen in URLs, so the base MUST be exactly this
     // or all built assets return 404.
-    base: '/Mayur-Computech/',
+    base: '/Mayur-Computech-/',
     plugins: [react()],
     resolve: {
       alias: {
