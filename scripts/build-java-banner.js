@@ -1,0 +1,124 @@
+import fs from 'fs';
+import sharp from 'sharp';
+
+const WIDTH = 1200;
+const HEIGHT = 675; // 16:9
+
+// Accurate SVG recreation of the official Oracle/Sun Java logo (coffee cup with red steam, blue saucer and cups, bold red Java text)
+const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${WIDTH} ${HEIGHT}" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#f8fafc" />
+      <stop offset="100%" stop-color="#eff6ff" />
+    </linearGradient>
+
+    <radialGradient id="centerHighlight" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+      <stop offset="50%" stop-color="#f1f5f9" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#e2e8f0" stop-opacity="0.4" />
+    </radialGradient>
+
+    <!-- Subtle Tech Matrix / Grid Background -->
+    <pattern id="codeGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="1.2" fill="#cbd5e1" opacity="0.6" />
+    </pattern>
+
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.08" />
+    </filter>
+
+    <linearGradient id="cupBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#007396" />
+      <stop offset="100%" stop-color="#1b88af" />
+    </linearGradient>
+    <linearGradient id="steamRed" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#ea2d2e" />
+      <stop offset="100%" stop-color="#f84742" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#bgLight)" />
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#codeGrid)" />
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#centerHighlight)" />
+
+  <!-- Code Syntax Accents in Background -->
+  <g opacity="0.14" font-family="'Courier New', monospace" font-size="20" font-weight="700" fill="#0f172a">
+    <text x="70" y="90">public class Main {</text>
+    <text x="110" y="130">public static void main(String[] args) {</text>
+    <text x="150" y="170">System.out.println("Welcome to Java!");</text>
+    <text x="110" y="210">}</text>
+    <text x="70" y="250">}</text>
+
+    <text x="820" y="470">class Student {</text>
+    <text x="860" y="510">private String name;</text>
+    <text x="860" y="550">public void learnOOP() { ... }</text>
+    <text x="820" y="590">}</text>
+  </g>
+
+  <!-- Central Brand Container -->
+  <g transform="translate(190, 80)" filter="url(#softShadow)">
+    <!-- JAVA COFFEE CUP ICON (Scalable vector paths matching official Java silhouette) -->
+    <g transform="translate(40, 40) scale(1.18)">
+      <!-- Red Steam plumes -->
+      <path d="M 125,50 C 135,110 95,140 135,210 C 120,170 145,150 140,110 C 135,70 120,60 125,50 Z" fill="url(#steamRed)" />
+      <path d="M 160,80 C 170,120 145,155 170,210 C 160,180 180,165 175,130 C 170,95 155,90 160,80 Z" fill="url(#steamRed)" />
+
+      <!-- Blue Cup Top Rim & Handle -->
+      <path d="M 40,215 C 80,195 210,195 250,215 C 220,230 70,230 40,215 Z" fill="url(#cupBlue)" />
+      <!-- Handle -->
+      <path d="M 225,200 C 265,200 275,250 220,270 C 215,260 210,255 220,250 C 248,242 245,215 225,212 Z" fill="url(#cupBlue)" />
+      
+      <!-- Cup Middle Layer -->
+      <path d="M 60,240 C 90,225 195,225 225,240 C 190,265 95,265 60,240 Z" fill="url(#cupBlue)" />
+      
+      <!-- Cup Base Layer -->
+      <path d="M 75,275 C 105,260 180,260 210,275 C 180,295 105,295 75,275 Z" fill="url(#cupBlue)" />
+
+      <!-- Bottom Saucer Plate -->
+      <path d="M 20,320 C 60,290 230,290 270,320 C 220,350 70,350 20,320 Z" fill="url(#cupBlue)" />
+      <path d="M 45,340 C 85,325 205,325 245,340 C 205,358 85,358 45,340 Z" fill="url(#cupBlue)" />
+    </g>
+
+    <!-- BOLD RED "Java" TYPOGRAPHY (Matching uploaded brand image) -->
+    <g transform="translate(420, 290)">
+      <text x="0" y="0" 
+            font-family="'Arial Rounded MT Bold', 'Montserrat', 'Helvetica Neue', Arial, sans-serif" 
+            font-weight="900" 
+            font-size="205" 
+            fill="#e11d23" 
+            letter-spacing="-4">
+        Java
+      </text>
+      <!-- Trademark TM -->
+      <text x="440" y="-120" 
+            font-family="'Arial', sans-serif" 
+            font-weight="700" 
+            font-size="28" 
+            fill="#e11d23">
+        TM
+      </text>
+    </g>
+  </g>
+
+  <!-- Bottom Tag Bar -->
+  <g transform="translate(600, 595)">
+    <rect x="-180" y="-20" width="360" height="40" rx="20" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5" filter="url(#softShadow)" />
+    <text x="0" y="6" text-anchor="middle" font-family="'Inter', sans-serif" font-weight="800" font-size="14" fill="#0f172a" letter-spacing="1.5">
+      CORE JAVA &amp; OOP FUNDAMENTALS
+    </text>
+  </g>
+</svg>
+`;
+
+fs.writeFileSync('public/java-banner.svg', svg.trim());
+console.log('Saved java-banner.svg');
+
+await sharp(Buffer.from(svg.trim()))
+  .resize(WIDTH, HEIGHT)
+  .png({ quality: 100 })
+  .toFile('public/java-banner.png');
+
+console.log('Generated public/java-banner.png successfully');
