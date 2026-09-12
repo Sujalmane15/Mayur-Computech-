@@ -12,7 +12,7 @@ const coursesData = [
     duration: '3 Months',
     subtitle: 'Govt. Recognized · MS-Office 2021 & AI Tools',
     icon: '💻',
-    image: '/mscit-official-banner.png',
+    image: 'mscit-official-banner.png',
     badge: 'MS-Office 2021 · Center: 78210482',
     topics: [
       'Computer Fundamentals & Windows 10/11',
@@ -29,7 +29,7 @@ const coursesData = [
     duration: '3–4 Months',
     subtitle: 'MS Office 2021 Suite with AI Assistance',
     icon: '📄',
-    image: '/msoffice-course-banner.jpg',
+    image: 'msoffice-course-banner.jpg',
     badge: 'MS Office 2021 Suite',
     topics: [
       'Computer Fundamentals & File Management',
@@ -46,7 +46,7 @@ const coursesData = [
     duration: '3–4 Months',
     subtitle: 'Advanced Excel with AI & Analytics',
     icon: '📊',
-    image: '/advanced-excel-banner.jpg',
+    image: 'advanced-excel-banner.jpg',
     badge: 'Formulas & Dashboards',
     topics: [
       'Advanced Formulas & Lookups (XLOOKUP)',
@@ -63,7 +63,7 @@ const coursesData = [
     duration: '3 Months',
     subtitle: 'Tally Prime with GST, TDS & Payroll',
     icon: '💼',
-    image: '/tally-prime-banner.jpg',
+    image: 'tally-prime-banner.jpg',
     badge: 'GST & Payroll Certified',
     topics: [
       'Accounting Fundamentals & Ledgers',
@@ -80,7 +80,7 @@ const coursesData = [
     duration: '6 Months',
     subtitle: 'For Undergraduates & Graduates',
     icon: '📈',
-    image: '/digital-marketing-banner.jpg',
+    image: 'digital-marketing-banner.jpg',
     badge: 'SEO & Ads Mastery',
     topics: [
       'SEO & Google Search Ads (SEM)',
@@ -97,7 +97,7 @@ const coursesData = [
     duration: '3–4 Months',
     subtitle: 'For CS, IT & Engineering Students',
     icon: '⚡',
-    image: '/c-cpp-banner.png',
+    image: 'c-cpp-banner.png',
     badge: 'C & C++ Programming',
     topics: [
       'Programming Fundamentals & Logic',
@@ -114,7 +114,7 @@ const coursesData = [
     duration: '3–4 Months',
     subtitle: 'Full Stack Frontend & Backend',
     icon: '🌐',
-    image: '/web-development-banner.jpg',
+    image: 'web-development-banner.jpg',
     badge: 'Full Stack Web Dev',
     topics: [
       'HTML5, Modern CSS3 & JavaScript',
@@ -131,7 +131,7 @@ const coursesData = [
     duration: '3–4 Months',
     subtitle: 'Java Fundamentals to OOP Concepts',
     icon: '☕',
-    image: '/java-banner.png',
+    image: 'java-banner.png',
     badge: 'Core Java & OOP',
     topics: [
       'Java Syntax, Variables & Data Types',
@@ -148,7 +148,7 @@ const coursesData = [
     duration: '2–3 Months',
     subtitle: 'Govt. Certified CCTP / GCC-TBC Speed Training',
     icon: '⌨️',
-    image: '/marathi-typing-banner.jpg',
+    image: 'marathi-typing-banner.jpg',
     badge: 'CCTP 30 WPM Govt. Valid',
     topics: [
       'Inscript & Remington Keyboard Layouts',
@@ -165,7 +165,7 @@ const coursesData = [
     duration: '2–3 Months',
     subtitle: 'Govt. Certified CCTP / GCC-TBC Speed Training',
     icon: '⌨️',
-    image: '/english-typing-banner.jpg',
+    image: 'english-typing-banner.jpg',
     badge: 'CCTP 30/40 WPM Valid',
     topics: [
       'Touch Typing & Home Row Finger Techniques',
@@ -182,7 +182,7 @@ const coursesData = [
     duration: '4–6 Months',
     subtitle: 'From Intelligence to Real World Machines',
     icon: '🤖',
-    image: '/ai-robotics-banner.jpg',
+    image: 'ai-robotics-banner.jpg',
     badge: 'AI, ML & Robotics',
     topics: [
       'Artificial Intelligence Basics & Python',
@@ -199,7 +199,7 @@ const coursesData = [
     duration: '2–3 Months',
     subtitle: 'Turn Your Data Into Powerful Insights',
     icon: '📊',
-    image: '/power-bi-banner.jpg',
+    image: 'power-bi-banner.jpg',
     badge: 'Data Analytics & DAX',
     topics: [
       'Data Ingestion (Excel, SQL Database & Cloud)',
@@ -210,15 +210,6 @@ const coursesData = [
     ]
   }
 ];
-
-// Document Ready Initialization
-document.addEventListener('DOMContentLoaded', () => {
-  renderCourses('all');
-  initCategoryFilters();
-  initMobileNav();
-  initContactForm();
-  updateDynamicYear();
-});
 
 // Render Courses to Grid
 function renderCourses(filterCategory) {
@@ -341,7 +332,8 @@ function initScrollSpy() {
 
   window.addEventListener('scroll', () => {
     let current = '';
-    const scrollPos = window.scrollY + 160;
+    const scrollY = window.scrollY ?? window.pageYOffset ?? document.documentElement.scrollTop ?? 0;
+    const scrollPos = scrollY + 160;
 
     sections.forEach(section => {
       const top = section.offsetTop;
@@ -434,14 +426,14 @@ function updateDynamicYear() {
 }
 
 // Banner & Gallery Lightbox Modal
-let currentModalCourse = '';
+window.currentModalCourse = '';
 
 function openBannerModal(imageSrc, courseTitle) {
   const modal = document.getElementById('bannerModal');
   const modalImg = document.getElementById('bannerModalImg');
   const modalTitle = document.getElementById('bannerModalTitle');
   if (modal && modalImg) {
-    currentModalCourse = courseTitle;
+    window.currentModalCourse = courseTitle;
     modalImg.src = imageSrc;
     if (modalTitle) {
       modalTitle.textContent = `${courseTitle} - Official Admission Poster`;
@@ -456,7 +448,7 @@ function openGalleryModal(imageSrc, title, desc) {
   const modalImg = document.getElementById('bannerModalImg');
   const modalTitle = document.getElementById('bannerModalTitle');
   if (modal && modalImg) {
-    currentModalCourse = title;
+    window.currentModalCourse = title;
     modalImg.src = imageSrc;
     if (modalTitle) {
       modalTitle.textContent = title;

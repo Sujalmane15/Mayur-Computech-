@@ -1,11 +1,13 @@
-import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    // GitHub Pages serves this site from the /Mayur-Computech/ subpath.
+    // All built asset URLs are prefixed with this base so CSS/JS/images load correctly.
+    base: '/Mayur-Computech/',
+    plugins: [react()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
