@@ -61,11 +61,13 @@ This repository is configured to deploy automatically to GitHub Pages using
 **GitHub Actions** (see `.github/workflows/deploy.yml`).
 
 - The workflow runs on every **push to `main`**
-- Install dependencies → `npm run build` → deploy the `dist/` output
-- The site uses Vite's `base: '/Mayur-Computech-/'` (matching the GitHub repo
-  `Sujalmane15/Mayur-Computech-` exactly)
-  so all CSS, JavaScript and image paths resolve correctly under the
-  `/Mayur-Computech-/` subpath
+- This is a **plain static site** — `index.html` + `styles.css` + `script.js`
+  + images are deployed **directly, with no build step**
+  (no `npm run build` / no Vite processing, so relative paths like
+  `script.js` / `styles.css` keep working exactly as on localhost)
+- `vite.config.ts` `base: '/Mayur-Computech-/'` is only for local
+  `npm run dev` / `npm run build` previews — it is NOT used by the
+  Pages deployment
 
 **Live URL:** https://sujalmane15.github.io/Mayur-Computech-/
 

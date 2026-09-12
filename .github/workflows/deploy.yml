@@ -1,5 +1,11 @@
 # Deploy Mayur Computech to GitHub Pages
 # Runs on every push to main (and can be triggered manually from the Actions tab).
+#
+# NOTE: this is a plain static site (index.html + styles.css + script.js
+# + images). There is NO build step — the source files ARE the production
+# site. We deploy them directly. (Previously `npm run build` (Vite) rewrote
+# asset URLs and script.js 404'd on Pages, killing the hamburger menu and
+# every interactive feature, while localhost worked fine.)
 
 name: Deploy to GitHub Pages
 
@@ -20,29 +26,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 1) Build the static site
+  # 1) Package the static site
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build production site
-        run: npm run build
+      - name: Assemble static site
+        run: |
+          mkdir -p dist
+          # Copy every site file into dist/ except git/dev-only paths.
+          # (dist/ itself is git-ignored, so this is a clean copy.)
+          for f in * .*; do
+            case "$f" in
+              .|..|.git|.github|node_modules|dist) continue ;;
+              *) cp -r "$f" dist/ 2>/dev/null || true ;;
+            esac
+          done
+          # Fail loudly if the entry point is missing
+          test -f dist/index.html || (echo "ERROR: index.html missing from artifact" && exit 1)
+          test -f dist/script.js || (echo "ERROR: script.js missing from artifact" && exit 1)
+          test -f dist/styles.css || (echo "ERROR: styles.css missing from artifact" && exit 1)
+          ls dist
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Vite outputs the production build here (see vite.config.ts)
           path: dist
 
   # 2) Deploy the built artifact to GitHub Pages
