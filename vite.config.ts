@@ -4,10 +4,11 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    // GitHub Pages serves this site from the /Mayur-Computech-/ subpath.
-    // NOTE: the repository is named "Mayur-Computech-" (trailing hyphen) —
-    // the base MUST match the repo name exactly or assets return 404.
-    base: '/Mayur-Computech-/',
+    // GitHub Pages serves this site from the /Mayur-Computech/ subpath.
+    // NOTE: the GitHub repo is "Sujalmane15/Mayur-Computech" — GitHub strips
+    // the folder's trailing hyphen in URLs, so the base MUST be exactly this
+    // or all built assets return 404.
+    base: '/Mayur-Computech/',
     plugins: [react()],
     resolve: {
       alias: {
