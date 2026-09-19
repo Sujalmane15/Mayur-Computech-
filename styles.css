@@ -592,6 +592,22 @@ body {
   max-width: 620px;
   margin-bottom: 22px;
 }
+.trainer-portrait {
+  width: min(100%, 240px);
+  aspect-ratio: 4 / 3;
+  margin-bottom: 22px;
+  overflow: hidden;
+  border: 4px solid #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  background: var(--primary-navy);
+}
+.trainer-portrait img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
 .trainer-socials {
   display: flex;
   flex-wrap: wrap;
@@ -637,28 +653,6 @@ body {
   background: linear-gradient(135deg, #fdf2f8 0%, #eff6ff 100%);
   color: #d62976;
   border-color: #fbcfe8;
-}
-.trainer-visual {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 220px;
-}
-.trainer-photo-card {
-  width: min(100%, 290px);
-  background: #ffffff;
-  border: 1px solid #dbeafe;
-  border-radius: var(--radius-lg);
-  padding: 14px;
-  box-shadow: var(--shadow-md);
-}
-.trainer-photo-card img {
-  display: block;
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-  border-radius: 14px;
-  background: #e2e8f0;
 }
 .trainer-detail-grid {
   display: grid;

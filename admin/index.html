@@ -26,32 +26,27 @@
           <div class="header-actions"><a href="../" class="text-button">View website</a><button class="secondary-button" id="logoutButton" type="button">Log out</button></div>
         </header>
         <p class="form-message" id="dashboardMessage" role="status"></p>
+        <div class="content-tabs" role="tablist" aria-label="Content management">
+          <button class="content-tab active" id="galleryTab" type="button" role="tab" aria-selected="true" data-content-tab="gallery">Gallery</button>
+          <button class="content-tab" id="trainerTab" type="button" role="tab" aria-selected="false" data-content-tab="trainer">Trainer</button>
+        </div>
         <div class="dashboard-grid">
           <section class="panel">
-            <div class="panel-heading"><div><p class="eyebrow">Content</p><h2 id="formTitle">Add image</h2></div><button class="text-button" id="cancelEditButton" type="button" hidden>Cancel edit</button></div>
+            <div class="panel-heading"><div><p class="eyebrow" id="contentEyebrow">Gallery content</p><h2 id="formTitle">Add image</h2></div><button class="text-button" id="cancelEditButton" type="button" hidden>Cancel edit</button></div>
             <form id="galleryForm" class="stack-form">
               <input id="itemId" type="hidden" />
-              <label>Photo<input id="imageFile" type="file" accept="image/jpeg,image/png,image/webp" /></label>
-              <p class="field-help">JPG, PNG, or WEBP up to 8 MB. A new photo is required when adding an image.</p>
+              <label id="photoLabel">Photo<input id="imageFile" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+              <p class="field-help" id="photoHelp">JPG, PNG, or WEBP up to 8 MB. A new photo is required when adding an image.</p>
               <label>Title<input id="title" type="text" maxlength="160" required /></label>
               <label>Description<textarea id="description" rows="3" maxlength="500"></textarea></label>
               <label>Alt text<input id="altText" type="text" maxlength="200" required /></label>
-              <div class="form-row">
-                <label>Section
-                  <select id="itemSection">
-                    <option value="gallery">Gallery</option>
-                    <option value="trainer">Trainer</option>
-                  </select>
-                </label>
-                <label>Category<input id="category" type="text" maxlength="60" placeholder="lab" /></label>
-              </div>
-              <div class="form-row"><label>Category label<input id="categoryLabel" type="text" maxlength="60" placeholder="Computer Lab" /></label><label>Display order<input id="displayOrder" type="number" min="0" step="1" value="0" required /></label></div>
-              <div class="form-row"><label class="checkbox-label"><input id="isPublished" type="checkbox" /> Published</label></div>
+              <div class="form-row gallery-only-field"><label>Category<input id="category" type="text" maxlength="60" placeholder="lab" required /></label><label>Category label<input id="categoryLabel" type="text" maxlength="60" placeholder="Computer Lab" required /></label></div>
+              <div class="form-row"><label class="gallery-only-field">Display order<input id="displayOrder" type="number" min="0" step="1" value="0" required /></label><label class="checkbox-label"><input id="isPublished" type="checkbox" /> Published</label></div>
               <button class="primary-button" id="saveButton" type="submit">Add image</button>
             </form>
           </section>
           <section class="panel panel-wide">
-            <div class="panel-heading"><div><p class="eyebrow">Published and hidden photos</p><h2>Gallery items</h2></div><span class="count-badge" id="itemCount">0</span></div>
+            <div class="panel-heading"><div><p class="eyebrow" id="itemsEyebrow">Published and hidden photos</p><h2 id="itemsTitle">Gallery items</h2></div><span class="count-badge" id="itemCount">0</span></div>
             <div class="items-list" id="itemsList"><p class="muted">Loading gallery items...</p></div>
           </section>
         </div>

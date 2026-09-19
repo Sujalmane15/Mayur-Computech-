@@ -12,8 +12,14 @@
   const cancelEditButton = document.getElementById('cancelEditButton');
   const formTitle = document.getElementById('formTitle');
   const saveButton = document.getElementById('saveButton');
+  const contentTabs = document.querySelectorAll('[data-content-tab]');
+  const contentEyebrow = document.getElementById('contentEyebrow');
+  const itemsEyebrow = document.getElementById('itemsEyebrow');
+  const itemsTitle = document.getElementById('itemsTitle');
+  const galleryOnlyFields = document.querySelectorAll('.gallery-only-field');
   let client;
   let items = [];
+  let activeTab = 'gallery';
 
   function message(element, text, success = false) {
     element.textContent = text;
@@ -52,13 +58,29 @@
   function resetForm() {
     galleryForm.reset();
     document.getElementById('itemId').value = '';
-    document.getElementById('itemSection').value = 'gallery';
-    document.getElementById('category').value = '';
-    document.getElementById('categoryLabel').value = '';
-    document.getElementById('displayOrder').value = items.length;
-    formTitle.textContent = 'Add image';
-    saveButton.textContent = 'Add image';
+    document.getElementById('displayOrder').value = items.filter(item => item.category !== 'trainer').length;
+    formTitle.textContent = activeTab === 'trainer' ? 'Add trainer photo' : 'Add image';
+    saveButton.textContent = activeTab === 'trainer' ? 'Add trainer photo' : 'Add image';
     cancelEditButton.hidden = true;
+  }
+
+  function setActiveTab(tab) {
+    activeTab = tab;
+    contentTabs.forEach(button => {
+      const isActive = button.dataset.contentTab === tab;
+      button.classList.toggle('active', isActive);
+      button.setAttribute('aria-selected', String(isActive));
+    });
+    const trainerMode = tab === 'trainer';
+    contentEyebrow.textContent = trainerMode ? 'Trainer profile content' : 'Gallery content';
+    itemsEyebrow.textContent = trainerMode ? 'Published and hidden trainer photos' : 'Published and hidden photos';
+    itemsTitle.textContent = trainerMode ? 'Trainer photos' : 'Gallery items';
+    galleryOnlyFields.forEach(field => { field.hidden = trainerMode; });
+    document.getElementById('category').required = !trainerMode;
+    document.getElementById('categoryLabel').required = !trainerMode;
+    document.getElementById('displayOrder').required = !trainerMode;
+    resetForm();
+    renderItems();
   }
 
   function editItem(item) {
@@ -66,24 +88,26 @@
     document.getElementById('title').value = item.title;
     document.getElementById('description').value = item.description || '';
     document.getElementById('altText').value = item.alt_text;
-    document.getElementById('itemSection').value = item.category === 'trainer' ? 'trainer' : 'gallery';
-    document.getElementById('category').value = item.category === 'trainer' ? '' : item.category;
-    document.getElementById('categoryLabel').value = item.category === 'trainer' ? 'Trainer' : item.category_label;
+    document.getElementById('category').value = item.category;
+    document.getElementById('categoryLabel').value = item.category_label;
     document.getElementById('displayOrder').value = item.display_order;
     document.getElementById('isPublished').checked = item.is_published;
-    formTitle.textContent = 'Edit image';
+    formTitle.textContent = activeTab === 'trainer' ? 'Edit trainer photo' : 'Edit image';
     saveButton.textContent = 'Save changes';
     cancelEditButton.hidden = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function renderItems() {
-    itemCount.textContent = items.length;
-    if (!items.length) {
-      itemsList.innerHTML = '<p class="muted">No gallery items yet. Add the first image using the form.</p>';
+    const visibleItems = items.filter(item => activeTab === 'trainer' ? item.category === 'trainer' : item.category !== 'trainer');
+    itemCount.textContent = visibleItems.length;
+    if (!visibleItems.length) {
+      itemsList.innerHTML = activeTab === 'trainer'
+        ? '<p class="muted">No trainer photo yet. Add a profile photo using the form.</p>'
+        : '<p class="muted">No gallery items yet. Add the first image using the form.</p>';
       return;
     }
-    itemsList.innerHTML = items.map((item, index) => `<article class="item-row"><img src="${escapeText(item.thumbnail_url || item.image_url)}" alt=""><div><p class="item-title">${escapeText(item.title)}</p><p class="item-meta">${escapeText(item.category_label)} · order ${item.display_order}</p><span class="status-pill ${item.is_published ? '' : 'hidden-status'}">${item.is_published ? 'Published' : 'Hidden'}</span></div><div class="item-actions"><button class="mini-button" data-action="up" data-id="${item.id}" ${index === 0 ? 'disabled' : ''}>Up</button><button class="mini-button" data-action="down" data-id="${item.id}" ${index === items.length - 1 ? 'disabled' : ''}>Down</button><button class="mini-button" data-action="edit" data-id="${item.id}">Edit</button><button class="mini-button" data-action="toggle" data-id="${item.id}">${item.is_published ? 'Hide' : 'Publish'}</button><button class="mini-button danger" data-action="delete" data-id="${item.id}">Delete</button></div></article>`).join('');
+    itemsList.innerHTML = visibleItems.map((item, index) => `<article class="item-row"><img src="${escapeText(item.thumbnail_url || item.image_url)}" alt=""><div><p class="item-title">${escapeText(item.title)}</p><p class="item-meta">${escapeText(item.category_label)}${activeTab === 'gallery' ? ` · order ${item.display_order}` : ''}</p><span class="status-pill ${item.is_published ? '' : 'hidden-status'}">${item.is_published ? 'Published' : 'Hidden'}</span></div><div class="item-actions">${activeTab === 'gallery' ? `<button class="mini-button" data-action="up" data-id="${item.id}" ${index === 0 ? 'disabled' : ''}>Up</button><button class="mini-button" data-action="down" data-id="${item.id}" ${index === visibleItems.length - 1 ? 'disabled' : ''}>Down</button>` : ''}<button class="mini-button" data-action="edit" data-id="${item.id}">Edit</button><button class="mini-button" data-action="toggle" data-id="${item.id}">${item.is_published ? 'Hide' : 'Publish'}</button><button class="mini-button danger" data-action="delete" data-id="${item.id}">Delete</button></div></article>`).join('');
   }
 
   async function loadItems() {
@@ -112,16 +136,13 @@
       if (!id && !file) throw new Error('Choose an image before adding a gallery item.');
       if (file) uploaded = await callImageFunction('imagekit-upload', (() => { const form = new FormData(); form.append('file', file); return form; })());
       const { data: { user } } = await client.auth.getUser();
-      const section = document.getElementById('itemSection').value;
-      const categoryValue = document.getElementById('category').value.trim();
-      const categoryLabelValue = document.getElementById('categoryLabel').value.trim();
       const values = {
         title: document.getElementById('title').value.trim(),
         description: document.getElementById('description').value.trim(),
         alt_text: document.getElementById('altText').value.trim(),
-        category: section === 'trainer' ? 'trainer' : (categoryValue || 'gallery').toLowerCase().replace(/\s+/g, '-'),
-        category_label: section === 'trainer' ? 'Trainer' : (categoryLabelValue || 'Gallery'),
-        display_order: Number(document.getElementById('displayOrder').value),
+        category: activeTab === 'trainer' ? 'trainer' : document.getElementById('category').value.trim().toLowerCase().replace(/\s+/g, '-'),
+        category_label: activeTab === 'trainer' ? 'Trainer' : document.getElementById('categoryLabel').value.trim(),
+        display_order: activeTab === 'trainer' ? 0 : Number(document.getElementById('displayOrder').value),
         is_published: document.getElementById('isPublished').checked
       };
       if (uploaded) Object.assign(values, { image_url: uploaded.imageUrl, image_path: uploaded.imagePath, image_file_id: uploaded.imageFileId, thumbnail_url: uploaded.thumbnailUrl });
@@ -135,7 +156,7 @@
       if (id && uploaded?.imageFileId && oldItem?.image_file_id) await callImageFunction('imagekit-delete', JSON.stringify({ fileId: oldItem.image_file_id })).catch(() => {});
       resetForm();
       await loadItems();
-      message(dashboardMessage, 'Gallery item saved.', true);
+      message(dashboardMessage, activeTab === 'trainer' ? 'Trainer photo saved.' : 'Gallery item saved.', true);
     } catch (error) { message(dashboardMessage, error.message || 'Could not save gallery item.'); }
     finally { saveButton.disabled = false; }
   }
@@ -193,6 +214,7 @@
   });
   galleryForm.addEventListener('submit', saveItem);
   itemsList.addEventListener('click', handleItemAction);
+  contentTabs.forEach(button => button.addEventListener('click', () => setActiveTab(button.dataset.contentTab)));
   cancelEditButton.addEventListener('click', resetForm);
   document.getElementById('logoutButton').addEventListener('click', () => client?.auth.signOut());
   init();
