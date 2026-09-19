@@ -54,6 +54,8 @@ jobs:
           test -f dist/index.html || (echo "ERROR: index.html missing from artifact" && exit 1)
           test -f dist/script.js || (echo "ERROR: script.js missing from artifact" && exit 1)
           test -f dist/styles.css || (echo "ERROR: styles.css missing from artifact" && exit 1)
+          test -f dist/gallery-data.js || (echo "ERROR: gallery-data.js missing from artifact" && exit 1)
+          test -f dist/admin/index.html || (echo "ERROR: admin entry point missing from artifact" && exit 1)
           # Warn (not fail) about referenced local images missing from dist/
           echo "--- dist contents ---"
           ls dist

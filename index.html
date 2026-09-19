@@ -420,80 +420,14 @@
 
           <!-- Gallery Filter Pills -->
           <div class="gallery-filters" id="galleryFilters">
-            <button class="g-filter-btn active" data-gfilter="all">All Photos (6)</button>
+            <button class="g-filter-btn active" data-gfilter="all">All Photos (0)</button>
             <button class="g-filter-btn" data-gfilter="lab">Computer Lab</button>
             <button class="g-filter-btn" data-gfilter="typing">Typing Arena</button>
             <button class="g-filter-btn" data-gfilter="ceremony">Certifications</button>
             <button class="g-filter-btn" data-gfilter="mentorship">Mentorship</button>
           </div>
 
-          <div class="gallery-grid" id="galleryGrid">
-            <div class="gallery-item" data-category="lab" onclick="openGalleryModal('gallery-lab.jpg', 'High-Tech Computer Training Lab', 'Students practicing on dedicated individual PC workstations with 100% hands-on learning.')">
-              <div class="gallery-img-wrapper">
-                <img src="gallery-lab.jpg" alt="High-Tech Computer Lab" loading="lazy" />
-                <div class="gallery-overlay">
-                  <span class="gallery-pill-tag">Computer Lab</span>
-                  <h4>Individual PC Workstations</h4>
-                  <p>100% Practical hands-on daily learning <i class="fa-solid fa-magnifying-glass-plus"></i></p>
-                </div>
-              </div>
-            </div>
-
-            <div class="gallery-item" data-category="typing" onclick="openGalleryModal('gallery-typing.jpg', 'Speed Typing Test Arena (CCTP)', 'Timed speed tests for Marathi & English 30/40 WPM with accuracy meters.')">
-              <div class="gallery-img-wrapper">
-                <img src="gallery-typing.jpg" alt="Typing Speed Arena" loading="lazy" />
-                <div class="gallery-overlay">
-                  <span class="gallery-pill-tag">Typing Arena</span>
-                  <h4>CCTP & GCC-TBC Speed Practice</h4>
-                  <p>Speed building with live accuracy software <i class="fa-solid fa-magnifying-glass-plus"></i></p>
-                </div>
-              </div>
-            </div>
-
-            <div class="gallery-item" data-category="ceremony" onclick="openGalleryModal('gallery-ceremony.jpg', 'Govt. Certificate Distribution Ceremony', 'Honoring successful MS-CIT and Typing exam toppers with medals & awards.')">
-              <div class="gallery-img-wrapper">
-                <img src="gallery-ceremony.jpg" alt="Certificate Felicitation" loading="lazy" />
-                <div class="gallery-overlay">
-                  <span class="gallery-pill-tag">Certifications</span>
-                  <h4>Govt. Certificate Distribution</h4>
-                  <p>Recognizing top performers with awards <i class="fa-solid fa-magnifying-glass-plus"></i></p>
-                </div>
-              </div>
-            </div>
-
-            <div class="gallery-item" data-category="mentorship" onclick="openGalleryModal('gallery-mentorship.jpg', 'Personal 1:1 Doubt Solving', 'Mayur Sir & Sujal Sir guiding students individually with concept clarity in Marathi, Hindi & English.')">
-              <div class="gallery-img-wrapper">
-                <img src="gallery-mentorship.jpg" alt="1:1 Mentorship Session" loading="lazy" />
-                <div class="gallery-overlay">
-                  <span class="gallery-pill-tag">Mentorship</span>
-                  <h4>1:1 Personal Doubt Solving</h4>
-                  <p>Concept clarity in Marathi, Hindi & English <i class="fa-solid fa-magnifying-glass-plus"></i></p>
-                </div>
-              </div>
-            </div>
-
-            <div class="gallery-item" data-category="lab" onclick="openGalleryModal('hero-student.jpg', 'Hands-on Coding & Web Project Lab', 'Students building responsive web apps, C/C++ programming, and live projects.')">
-              <div class="gallery-img-wrapper">
-                <img src="hero-student.jpg" alt="Coding Lab Session" loading="lazy" />
-                <div class="gallery-overlay">
-                  <span class="gallery-pill-tag">Computer Lab</span>
-                  <h4>Coding & Software Projects</h4>
-                  <p>Real-world projects on modern laptops & desktops <i class="fa-solid fa-magnifying-glass-plus"></i></p>
-                </div>
-              </div>
-            </div>
-
-            <div class="gallery-item" data-category="ceremony" onclick="openGalleryModal('mscit-official-banner.png', 'MS-Office 2021 & MS-CIT Pride', 'Government Authorised Center 78210482 official milestones.')">
-              <div class="gallery-img-wrapper">
-                <img src="mscit-official-banner.png" alt="Govt Certification Milestone" loading="lazy" />
-                <div class="gallery-overlay">
-                  <span class="gallery-pill-tag">Certifications</span>
-                  <h4>Government Certified Success</h4>
-                  <p>Center Code: 78210482 official milestones <i class="fa-solid fa-magnifying-glass-plus"></i></p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div class="gallery-grid" id="galleryGrid" aria-live="polite"></div>
         </div>
       </section>
 
@@ -1078,6 +1012,12 @@
         <button class="banner-modal-close" onclick="closeBannerModal()" aria-label="Close modal">
           <i class="fa-solid fa-xmark"></i>
         </button>
+        <button class="banner-modal-nav banner-modal-prev" id="galleryModalPrev" onclick="showPreviousGalleryItem()" aria-label="Previous gallery image" hidden>
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button class="banner-modal-nav banner-modal-next" id="galleryModalNext" onclick="showNextGalleryItem()" aria-label="Next gallery image" hidden>
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
         <div class="banner-modal-header">
           <div>
             <h4 id="bannerModalTitle" class="banner-modal-heading">Course Official Poster</h4>
@@ -1099,6 +1039,7 @@
     </div>
 
     <!-- Main Logic Script -->
+    <script src="gallery-data.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

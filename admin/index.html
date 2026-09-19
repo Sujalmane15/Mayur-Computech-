@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mayur Computech Admin</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <section class="login-panel" id="loginPanel" aria-labelledby="loginTitle">
+        <p class="eyebrow">Mayur Computech</p>
+        <h1 id="loginTitle">Gallery Admin</h1>
+        <p class="muted">Sign in with your Supabase administrator account.</p>
+        <form id="loginForm" class="stack-form">
+          <label>Email<input id="loginEmail" type="email" autocomplete="username" required /></label>
+          <label>Password<input id="loginPassword" type="password" autocomplete="current-password" required /></label>
+          <button class="primary-button" type="submit">Sign in</button>
+        </form>
+        <p class="form-message" id="loginMessage" role="alert"></p>
+      </section>
+
+      <section class="dashboard" id="dashboard" hidden>
+        <header class="dashboard-header">
+          <div><p class="eyebrow">Mayur Computech</p><h1>Gallery dashboard</h1></div>
+          <div class="header-actions"><a href="../" class="text-button">View website</a><button class="secondary-button" id="logoutButton" type="button">Log out</button></div>
+        </header>
+        <p class="form-message" id="dashboardMessage" role="status"></p>
+        <div class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-heading"><div><p class="eyebrow">Content</p><h2 id="formTitle">Add image</h2></div><button class="text-button" id="cancelEditButton" type="button" hidden>Cancel edit</button></div>
+            <form id="galleryForm" class="stack-form">
+              <input id="itemId" type="hidden" />
+              <label>Photo<input id="imageFile" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+              <p class="field-help">JPG, PNG, or WEBP up to 8 MB. A new photo is required when adding an image.</p>
+              <label>Title<input id="title" type="text" maxlength="160" required /></label>
+              <label>Description<textarea id="description" rows="3" maxlength="500"></textarea></label>
+              <label>Alt text<input id="altText" type="text" maxlength="200" required /></label>
+              <div class="form-row"><label>Category<input id="category" type="text" maxlength="60" placeholder="lab" required /></label><label>Category label<input id="categoryLabel" type="text" maxlength="60" placeholder="Computer Lab" required /></label></div>
+              <div class="form-row"><label>Display order<input id="displayOrder" type="number" min="0" step="1" value="0" required /></label><label class="checkbox-label"><input id="isPublished" type="checkbox" /> Published</label></div>
+              <button class="primary-button" id="saveButton" type="submit">Add image</button>
+            </form>
+          </section>
+          <section class="panel panel-wide">
+            <div class="panel-heading"><div><p class="eyebrow">Published and hidden photos</p><h2>Gallery items</h2></div><span class="count-badge" id="itemCount">0</span></div>
+            <div class="items-list" id="itemsList"><p class="muted">Loading gallery items...</p></div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="../gallery-data.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>

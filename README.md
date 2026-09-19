@@ -74,6 +74,40 @@ This repository is configured to deploy automatically to GitHub Pages using
 > GitHub Pages must be enabled once in the repository settings:
 > **Settings → Pages → Source: *GitHub Actions*** (never deploy from a branch).
 
+## ImageKit Gallery
+
+The Gallery section is rendered from `gallery-data.js` and does not bundle gallery image files. To publish photos:
+
+1. Upload images to ImageKit, preferably under `/mayur-computech/gallery/`.
+2. Set the public URL endpoint in `gallery-data.js`.
+3. Add one item per image with its ImageKit path, accessible alt text, title, description, and category.
+4. Push to `main` so the existing GitHub Pages workflow deploys the updated static files.
+
+Only the public ImageKit URL endpoint belongs in frontend configuration. Never add an ImageKit private key or upload credentials to this repository.
+
+## Admin Gallery CMS
+
+The public site remains a static GitHub Pages deployment. The admin panel lives at `/admin/` and uses Supabase Auth and PostgreSQL; ImageKit upload and deletion happen through Supabase Edge Functions so the ImageKit private key never reaches the browser.
+
+### Supabase setup
+
+1. Create a Supabase project and enable email/password authentication.
+2. Run `supabase/migrations/202609190001_gallery.sql` in the SQL editor.
+3. Create the first user in Supabase Auth, then insert that user's UUID into `public.admin_users` as shown at the bottom of the migration.
+4. Deploy `supabase/functions/imagekit-upload` and `supabase/functions/imagekit-delete` with the Supabase CLI.
+5. Configure Edge Function secrets: `IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_URL_ENDPOINT`, and optionally `IMAGEKIT_PUBLIC_KEY`.
+6. Put the Supabase project URL and anon key into `gallery-data.js` as `supabaseUrl` and `supabaseAnonKey`. The anon key is public; do not put a service-role key there.
+
+To preserve the current static gallery during migration, run `npm run seed:gallery`, review the generated `supabase/seed-gallery.generated.sql`, and run it in Supabase. After the database is configured, the public site reads only published database rows. Until then it uses the existing ImageKit configuration as a fallback.
+
+### Admin workflow
+
+Open `/Mayur-Computech-/admin/`, sign in with the Supabase Auth account, then add or edit gallery items. Choose a JPG, PNG, or WEBP image up to 8 MB; the browser sends it to the authenticated upload Edge Function. Use Publish/Hide, Up/Down, Edit, and Delete controls to manage the public gallery. Delete asks for confirmation and removes the database row before attempting to remove the stored ImageKit asset.
+
+### Deployment and security
+
+GitHub Pages serves `index.html`, `gallery-data.js`, and `admin/` as static files. Supabase supplies authentication, RLS-protected metadata, and Edge Functions; ImageKit supplies CDN delivery. Public RLS permits only published gallery reads. Insert, update, and delete policies require a row in `admin_users`. Never commit `.env`, a Supabase service-role key, an ImageKit private key, or upload signatures.
+
 ---
 
 © Mayur Computech. All Rights Reserved. Designed for Excellence.

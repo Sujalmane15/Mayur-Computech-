@@ -278,26 +278,114 @@ function initCategoryFilters() {
 }
 
 // Gallery Filters
+let galleryItems = [];
+let visibleGalleryItems = [];
+let currentGalleryIndex = -1;
+
+function getImageKitUrl(path, width, imageUrl = '') {
+  const sourceUrl = imageUrl || '';
+  if (sourceUrl) {
+    const separator = sourceUrl.includes('?') ? '&' : '?';
+    return `${sourceUrl}${separator}tr=w-${width},q-82,f-auto`;
+  }
+  const endpoint = window.MAYUR_GALLERY_CONFIG?.imageKitUrlEndpoint?.replace(/\/$/, '');
+  if (!endpoint || !path) return '';
+  const separator = path.includes('?') ? '&' : '?';
+  return `${endpoint}/${path.replace(/^\//, '')}${separator}tr=w-${width},q-82,f-auto`;
+}
+
+function escapeGalleryText(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[character]));
+}
+
+function renderGallery(filter = 'all') {
+  const grid = document.getElementById('galleryGrid');
+  if (!grid) return;
+
+  visibleGalleryItems = filter === 'all'
+    ? galleryItems
+    : galleryItems.filter(item => item.category === filter);
+
+  grid.innerHTML = '';
+  if (!visibleGalleryItems.length) {
+    grid.innerHTML = `<div class="gallery-empty-state"><i class="fa-regular fa-images"></i><h3>${galleryItems.length ? 'No photos in this category yet' : 'Gallery coming soon'}</h3><p>${galleryItems.length ? 'Choose another category to continue exploring Mayur Computech.' : 'New photos from our classrooms, lab, and student milestones will appear here.'}</p></div>`;
+    return;
+  }
+
+  visibleGalleryItems.forEach((item, index) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'gallery-item';
+    card.setAttribute('aria-label', `Open ${item.title}`);
+    card.addEventListener('click', () => openGalleryItem(index));
+    card.innerHTML = `<div class="gallery-img-wrapper"><img src="${escapeGalleryText(getImageKitUrl(item.path, 720, item.imageUrl))}" alt="${escapeGalleryText(item.alt)}" loading="lazy"><div class="gallery-overlay"><span class="gallery-pill-tag">${escapeGalleryText(item.categoryLabel)}</span><h4>${escapeGalleryText(item.title)}</h4><p>${escapeGalleryText(item.description)} <i class="fa-solid fa-magnifying-glass-plus"></i></p></div></div>`;
+    const image = card.querySelector('img');
+    image.addEventListener('error', () => {
+      card.classList.add('gallery-item-error');
+      image.removeAttribute('src');
+      image.alt = 'Image unavailable';
+      image.parentElement.insertAdjacentHTML('beforeend', '<div class="gallery-image-fallback"><i class="fa-regular fa-image"></i><span>Image unavailable</span></div>');
+    }, {once: true});
+    grid.appendChild(card);
+  });
+}
+
 function initGalleryFilters() {
   const filterBtns = document.querySelectorAll('.g-filter-btn');
-  const items = document.querySelectorAll('.gallery-item');
+  const configuredItems = window.MAYUR_GALLERY_CONFIG?.items || [];
+  galleryItems = configuredItems.filter(item => item.path && item.alt && item.title && item.category);
+  const allButton = document.querySelector('[data-gfilter="all"]');
+  if (allButton) allButton.textContent = `All Photos (${galleryItems.length})`;
+  renderGallery();
 
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const filter = btn.getAttribute('data-gfilter');
-
-      items.forEach(item => {
-        const itemCat = item.getAttribute('data-category');
-        if (filter === 'all' || itemCat === filter) {
-          item.style.display = 'block';
-        } else {
-          item.style.display = 'none';
-        }
-      });
+      renderGallery(filter);
     });
   });
+
+  loadPublishedGallery();
+}
+
+async function loadPublishedGallery() {
+  const config = window.MAYUR_GALLERY_CONFIG || {};
+  if (!config.supabaseUrl || !config.supabaseAnonKey) return;
+  const endpoint = `${config.supabaseUrl.replace(/\/$/, '')}/rest/v1/gallery_items?select=id,title,description,alt_text,image_url,image_path,thumbnail_url,category,category_label,display_order&is_published=eq.true&order=display_order.asc,created_at.desc`;
+  try {
+    const response = await fetch(endpoint, {
+      headers: {
+        apikey: config.supabaseAnonKey,
+        Authorization: `Bearer ${config.supabaseAnonKey}`
+      }
+    });
+    if (!response.ok) throw new Error('Published gallery unavailable');
+    const rows = await response.json();
+    galleryItems = rows.map(row => ({
+      id: row.id,
+      title: row.title,
+      description: row.description || '',
+      alt: row.alt_text,
+      path: row.image_path,
+      imageUrl: row.image_url,
+      thumbnailUrl: row.thumbnail_url,
+      category: row.category,
+      categoryLabel: row.category_label
+    }));
+    const allButton = document.querySelector('[data-gfilter="all"]');
+    if (allButton) allButton.textContent = `All Photos (${galleryItems.length})`;
+    renderGallery(document.querySelector('.g-filter-btn.active')?.getAttribute('data-gfilter') || 'all');
+  } catch (error) {
+    console.warn('Using static gallery fallback:', error);
+  }
 }
 
 // FAQ Accordion
@@ -427,6 +515,11 @@ function updateDynamicYear() {
 
 // Banner & Gallery Lightbox Modal
 window.currentModalCourse = '';
+const galleryModalState = {
+  title: '',
+  categoryLabel: '',
+  imageUrl: ''
+};
 
 function openBannerModal(imageSrc, courseTitle) {
   const modal = document.getElementById('bannerModal');
@@ -449,7 +542,11 @@ function openGalleryModal(imageSrc, title, desc) {
   const modalTitle = document.getElementById('bannerModalTitle');
   if (modal && modalImg) {
     window.currentModalCourse = title;
+    currentGalleryIndex = -1;
+    document.getElementById('galleryModalPrev').hidden = true;
+    document.getElementById('galleryModalNext').hidden = true;
     modalImg.src = imageSrc;
+    modalImg.alt = title;
     if (modalTitle) {
       modalTitle.textContent = title;
     }
@@ -458,10 +555,48 @@ function openGalleryModal(imageSrc, title, desc) {
   }
 }
 
+function openGalleryItem(index) {
+  const item = visibleGalleryItems[index];
+  if (!item) return;
+  currentGalleryIndex = index;
+  galleryModalState.title = item.title;
+  galleryModalState.categoryLabel = item.categoryLabel;
+  galleryModalState.imageUrl = getImageKitUrl(item.path, 1600, item.imageUrl);
+  const modal = document.getElementById('bannerModal');
+  const modalImg = document.getElementById('bannerModalImg');
+  const modalTitle = document.getElementById('bannerModalTitle');
+  const modalTag = document.querySelector('.banner-modal-tag');
+  if (!modal || !modalImg) return;
+  modalImg.src = galleryModalState.imageUrl;
+  modalImg.alt = item.alt;
+  if (modalTitle) modalTitle.textContent = item.title;
+  if (modalTag) modalTag.textContent = item.categoryLabel;
+  document.getElementById('galleryModalPrev').hidden = visibleGalleryItems.length < 2;
+  document.getElementById('galleryModalNext').hidden = visibleGalleryItems.length < 2;
+  modal.classList.add('active');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function showGalleryItem(offset) {
+  if (currentGalleryIndex < 0 || visibleGalleryItems.length < 2) return;
+  const nextIndex = (currentGalleryIndex + offset + visibleGalleryItems.length) % visibleGalleryItems.length;
+  openGalleryItem(nextIndex);
+}
+
+function showPreviousGalleryItem() {
+  showGalleryItem(-1);
+}
+
+function showNextGalleryItem() {
+  showGalleryItem(1);
+}
+
 function closeBannerModal() {
   const modal = document.getElementById('bannerModal');
   if (modal) {
     modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
 }
@@ -469,11 +604,15 @@ function closeBannerModal() {
 // Close modal on Escape key
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeBannerModal();
+  if (e.key === 'ArrowLeft') showPreviousGalleryItem();
+  if (e.key === 'ArrowRight') showNextGalleryItem();
 });
 
 // Expose globals for inline events
 window.openBannerModal = openBannerModal;
 window.openGalleryModal = openGalleryModal;
+window.showPreviousGalleryItem = showPreviousGalleryItem;
+window.showNextGalleryItem = showNextGalleryItem;
 window.closeBannerModal = closeBannerModal;
 window.selectCourse = selectCourse;
 
