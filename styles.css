@@ -555,6 +555,147 @@ body {
   color: var(--text-muted);
 }
 
+/* Mayur Sir Trainer Section */
+.trainer-section {
+  padding: 82px 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 1px solid var(--border-color);
+}
+.trainer-panel {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 32px;
+  padding: 36px;
+  border: 1px solid #dbeafe;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+  box-shadow: var(--shadow-md);
+}
+.trainer-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.trainer-title {
+  margin-bottom: 8px;
+}
+.trainer-role {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--royal-blue);
+  margin-bottom: 16px;
+}
+.trainer-intro {
+  font-size: 1.04rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  max-width: 620px;
+  margin-bottom: 22px;
+}
+.trainer-socials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.86rem;
+  transition: var(--transition);
+}
+.social-link i {
+  font-size: 0.95rem;
+}
+.social-link:hover,
+.social-link:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  outline: none;
+}
+.social-link.facebook {
+  background: #eff6ff;
+  color: #1877f2;
+  border-color: #bfdbfe;
+}
+.social-link.telegram {
+  background: #e0f2fe;
+  color: #229ed9;
+  border-color: #bae6fd;
+}
+.social-link.youtube {
+  background: #fef2f2;
+  color: #ff0000;
+  border-color: #fecaca;
+}
+.social-link.instagram {
+  background: linear-gradient(135deg, #fdf2f8 0%, #eff6ff 100%);
+  color: #d62976;
+  border-color: #fbcfe8;
+}
+.trainer-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+.detail-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 20px 18px;
+  box-shadow: var(--shadow-sm);
+}
+.detail-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--royal-blue);
+  margin-bottom: 10px;
+}
+.education-card strong,
+.experience-card strong {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--primary-navy);
+  display: block;
+}
+.experience-subtext {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.expertise-card ul {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+.expertise-card li {
+  position: relative;
+  padding-left: 18px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.expertise-card li::before {
+  content: '\f00c';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  left: 0;
+  top: 2px;
+  color: #16a34a;
+  font-size: 0.72rem;
+}
+
 /* About Us Section */
 .about-section {
   padding: 85px 0;
@@ -1760,8 +1901,8 @@ body {
 }
 .footer-grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
-  gap: 40px;
+  grid-template-columns: 1.5fr 1fr 1fr 1.2fr 1fr;
+  gap: 32px;
   margin-bottom: 50px;
 }
 .footer-col h5 {
@@ -1796,6 +1937,36 @@ body {
 .footer-links a:hover {
   color: var(--bright-yellow);
   padding-left: 5px;
+}
+.footer-social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footer-social-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  min-width: 140px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: var(--transition);
+}
+.footer-social-links a:hover,
+.footer-social-links a:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 200, 0, 0.5);
+  color: var(--bright-yellow);
+  outline: none;
+}
+.footer-social-links i {
+  width: 20px;
+  text-align: center;
 }
 .footer-bottom {
   text-align: center;
@@ -1850,6 +2021,9 @@ body {
   }
   .footer-grid {
     grid-template-columns: 1fr 1fr;
+  }
+  .trainer-panel {
+    grid-template-columns: 1fr;
   }
 }
 
