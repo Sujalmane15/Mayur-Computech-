@@ -638,6 +638,28 @@ body {
   color: #d62976;
   border-color: #fbcfe8;
 }
+.trainer-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+.trainer-photo-card {
+  width: min(100%, 290px);
+  background: #ffffff;
+  border: 1px solid #dbeafe;
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  box-shadow: var(--shadow-md);
+}
+.trainer-photo-card img {
+  display: block;
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 14px;
+  background: #e2e8f0;
+}
 .trainer-detail-grid {
   display: grid;
   grid-template-columns: 1fr;

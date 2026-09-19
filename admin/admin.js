@@ -52,6 +52,9 @@
   function resetForm() {
     galleryForm.reset();
     document.getElementById('itemId').value = '';
+    document.getElementById('itemSection').value = 'gallery';
+    document.getElementById('category').value = '';
+    document.getElementById('categoryLabel').value = '';
     document.getElementById('displayOrder').value = items.length;
     formTitle.textContent = 'Add image';
     saveButton.textContent = 'Add image';
@@ -63,8 +66,9 @@
     document.getElementById('title').value = item.title;
     document.getElementById('description').value = item.description || '';
     document.getElementById('altText').value = item.alt_text;
-    document.getElementById('category').value = item.category;
-    document.getElementById('categoryLabel').value = item.category_label;
+    document.getElementById('itemSection').value = item.category === 'trainer' ? 'trainer' : 'gallery';
+    document.getElementById('category').value = item.category === 'trainer' ? '' : item.category;
+    document.getElementById('categoryLabel').value = item.category === 'trainer' ? 'Trainer' : item.category_label;
     document.getElementById('displayOrder').value = item.display_order;
     document.getElementById('isPublished').checked = item.is_published;
     formTitle.textContent = 'Edit image';
@@ -108,12 +112,15 @@
       if (!id && !file) throw new Error('Choose an image before adding a gallery item.');
       if (file) uploaded = await callImageFunction('imagekit-upload', (() => { const form = new FormData(); form.append('file', file); return form; })());
       const { data: { user } } = await client.auth.getUser();
+      const section = document.getElementById('itemSection').value;
+      const categoryValue = document.getElementById('category').value.trim();
+      const categoryLabelValue = document.getElementById('categoryLabel').value.trim();
       const values = {
         title: document.getElementById('title').value.trim(),
         description: document.getElementById('description').value.trim(),
         alt_text: document.getElementById('altText').value.trim(),
-        category: document.getElementById('category').value.trim().toLowerCase().replace(/\s+/g, '-'),
-        category_label: document.getElementById('categoryLabel').value.trim(),
+        category: section === 'trainer' ? 'trainer' : (categoryValue || 'gallery').toLowerCase().replace(/\s+/g, '-'),
+        category_label: section === 'trainer' ? 'Trainer' : (categoryLabelValue || 'Gallery'),
         display_order: Number(document.getElementById('displayOrder').value),
         is_published: document.getElementById('isPublished').checked
       };

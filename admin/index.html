@@ -36,8 +36,17 @@
               <label>Title<input id="title" type="text" maxlength="160" required /></label>
               <label>Description<textarea id="description" rows="3" maxlength="500"></textarea></label>
               <label>Alt text<input id="altText" type="text" maxlength="200" required /></label>
-              <div class="form-row"><label>Category<input id="category" type="text" maxlength="60" placeholder="lab" required /></label><label>Category label<input id="categoryLabel" type="text" maxlength="60" placeholder="Computer Lab" required /></label></div>
-              <div class="form-row"><label>Display order<input id="displayOrder" type="number" min="0" step="1" value="0" required /></label><label class="checkbox-label"><input id="isPublished" type="checkbox" /> Published</label></div>
+              <div class="form-row">
+                <label>Section
+                  <select id="itemSection">
+                    <option value="gallery">Gallery</option>
+                    <option value="trainer">Trainer</option>
+                  </select>
+                </label>
+                <label>Category<input id="category" type="text" maxlength="60" placeholder="lab" /></label>
+              </div>
+              <div class="form-row"><label>Category label<input id="categoryLabel" type="text" maxlength="60" placeholder="Computer Lab" /></label><label>Display order<input id="displayOrder" type="number" min="0" step="1" value="0" required /></label></div>
+              <div class="form-row"><label class="checkbox-label"><input id="isPublished" type="checkbox" /> Published</label></div>
               <button class="primary-button" id="saveButton" type="submit">Add image</button>
             </form>
           </section>

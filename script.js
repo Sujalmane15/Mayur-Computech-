@@ -343,6 +343,7 @@ function initGalleryFilters() {
   const allButton = document.querySelector('[data-gfilter="all"]');
   if (allButton) allButton.textContent = `All Photos (${galleryItems.length})`;
   renderGallery();
+  renderTrainerPhoto();
 
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -383,6 +384,7 @@ async function loadPublishedGallery() {
     const allButton = document.querySelector('[data-gfilter="all"]');
     if (allButton) allButton.textContent = `All Photos (${galleryItems.length})`;
     renderGallery(document.querySelector('.g-filter-btn.active')?.getAttribute('data-gfilter') || 'all');
+    renderTrainerPhoto();
   } catch (error) {
     console.warn('Using static gallery fallback:', error);
   }
@@ -503,6 +505,24 @@ function initContactForm() {
       form.reset();
     });
   }
+}
+
+function renderTrainerPhoto() {
+  const trainerVisual = document.getElementById('trainerVisual');
+  if (!trainerVisual) return;
+
+  const trainerItem = [...(window.MAYUR_GALLERY_CONFIG?.items || []), ...galleryItems].find(item => item && item.category === 'trainer');
+  if (!trainerItem) {
+    trainerVisual.innerHTML = '';
+    return;
+  }
+
+  const imageUrl = getImageKitUrl(trainerItem.path, 800, trainerItem.imageUrl);
+  trainerVisual.innerHTML = `
+    <div class="trainer-photo-card">
+      <img src="${escapeGalleryText(imageUrl)}" alt="${escapeGalleryText(trainerItem.alt || 'Mayur Sir')}" loading="lazy" />
+    </div>
+  `;
 }
 
 // Dynamic Footer Year
