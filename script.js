@@ -211,52 +211,74 @@ const coursesData = [
   }
 ];
 
+const getPublicCourses = () => {
+  const cmsCourses = window.MAYUR_PUBLIC_CONTENT?.getPublishedCourses?.() || [];
+  return cmsCourses.length ? cmsCourses : coursesData;
+};
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[character]));
+}
+
 // Render Courses to Grid
 function renderCourses(filterCategory) {
   const container = document.getElementById('coursesGrid');
   if (!container) return;
 
+  const sourceCourses = getPublicCourses();
   const filtered = filterCategory === 'all' 
-    ? coursesData 
-    : coursesData.filter(c => c.category === filterCategory);
+    ? sourceCourses 
+    : sourceCourses.filter(c => c.category === filterCategory);
 
   container.innerHTML = filtered.map(course => {
     const hasImage = Boolean(course.image);
+    const safeTitle = escapeHtml(course.title);
+    const safeSubtitle = escapeHtml(course.subtitle);
+    const safeDuration = escapeHtml(course.duration);
+    const safeBadge = escapeHtml(course.badge || 'Govt. Recognized');
+    const safeCourseUrl = escapeHtml(course.title);
+    const safeTopics = (course.topics || []).map((topic) => `
+      <li>
+        <i class="fa-solid fa-circle-check"></i>
+        <span>${escapeHtml(topic)}</span>
+      </li>
+    `).join('');
     return `
-    <div class="course-card ${hasImage ? 'has-banner' : ''}" id="course-${course.id}">
+    <div class="course-card ${hasImage ? 'has-banner' : ''}" id="course-${escapeHtml(course.id)}">
       ${hasImage ? `
-        <div class="course-banner-wrap" onclick="openBannerModal('${course.image}', '${course.title}')" title="Click to view full official poster">
-          <img src="${course.image}" alt="${course.title} Official Poster" class="course-banner-img" loading="lazy" />
+        <div class="course-banner-wrap" onclick="openBannerModal('${escapeHtml(course.image)}', '${safeTitle}')" title="Click to view full official poster">
+          <img src="${escapeHtml(course.image)}" alt="${safeTitle} Official Poster" class="course-banner-img" loading="lazy" />
           <div class="course-banner-overlay">
             <span class="banner-badge-zoom"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Poster</span>
           </div>
-          <span class="course-banner-duration">${course.duration}</span>
+          <span class="course-banner-duration">${safeDuration}</span>
         </div>
       ` : ''}
 
       <div class="course-card-body">
         <div>
           <div class="course-card-top ${hasImage ? 'with-banner' : ''}">
-            <div class="course-icon-badge">${course.icon}</div>
+            <div class="course-icon-badge">${escapeHtml(course.icon)}</div>
             ${hasImage ? `
-              <span class="course-official-pill"><i class="fa-solid fa-award"></i> ${course.badge || 'Govt. Recognized'}</span>
+              <span class="course-official-pill"><i class="fa-solid fa-award"></i> ${safeBadge}</span>
             ` : `
-              <span class="course-duration">${course.duration}</span>
+              <span class="course-duration">${safeDuration}</span>
             `}
           </div>
-          <h3 class="course-title">${course.title}</h3>
-          <p class="course-subtitle">${course.subtitle}</p>
+          <h3 class="course-title">${safeTitle}</h3>
+          <p class="course-subtitle">${safeSubtitle}</p>
           <ul class="course-topics">
-            ${course.topics.map(topic => `
-              <li>
-                <i class="fa-solid fa-circle-check"></i>
-                <span>${topic}</span>
-              </li>
-            `).join('')}
+            ${safeTopics}
           </ul>
         </div>
-        <a href="#contact" class="course-action-btn" onclick="selectCourse('${course.title}')">
-          Enquire for ${course.title}
+        <a href="#contact" class="course-action-btn" onclick="selectCourse('${safeCourseUrl}')">
+          Enquire for ${safeTitle}
         </a>
       </div>
     </div>
@@ -322,7 +344,7 @@ function renderGallery(filter = 'all') {
     const card = document.createElement('button');
     card.type = 'button';
     card.className = 'gallery-item';
-    card.setAttribute('aria-label', `Open ${item.title}`);
+    card.setAttribute('aria-label', `Open ${escapeHtml(item.title)}`);
     card.addEventListener('click', () => openGalleryItem(index));
     card.innerHTML = `<div class="gallery-img-wrapper"><img src="${escapeGalleryText(getImageKitUrl(item.path, 720, item.imageUrl))}" alt="${escapeGalleryText(item.alt)}" loading="lazy"><div class="gallery-overlay"><span class="gallery-pill-tag">${escapeGalleryText(item.categoryLabel)}</span><h4>${escapeGalleryText(item.title)}</h4><p>${escapeGalleryText(item.description)} <i class="fa-solid fa-magnifying-glass-plus"></i></p></div></div>`;
     const image = card.querySelector('img');
@@ -334,6 +356,17 @@ function renderGallery(filter = 'all') {
     }, {once: true});
     grid.appendChild(card);
   });
+}
+
+function syncGalleryFromCms() {
+  const cmsGallery = window.MAYUR_PUBLIC_CONTENT?.getPublishedGallery?.() || [];
+  if (!cmsGallery.length) return false;
+
+  galleryItems = cmsGallery;
+  const allButton = document.querySelector('[data-gfilter="all"]');
+  if (allButton) allButton.textContent = `All Photos (${galleryItems.length})`;
+  renderGallery(document.querySelector('.g-filter-btn.active')?.getAttribute('data-gfilter') || 'all');
+  return true;
 }
 
 function initGalleryFilters() {
@@ -353,7 +386,9 @@ function initGalleryFilters() {
     });
   });
 
-  loadPublishedGallery();
+  if (!syncGalleryFromCms()) {
+    loadPublishedGallery();
+  }
 }
 
 async function loadPublishedGallery() {
@@ -479,6 +514,46 @@ function initMobileNav() {
 }
 
 // Contact Form Handler
+function updateTestimonialsFromCms() {
+  const cmsTestimonials = window.MAYUR_PUBLIC_CONTENT?.getPublishedTestimonials?.() || [];
+  const container = document.querySelector('.testimonials-grid');
+  if (!container || !cmsTestimonials.length) return false;
+
+  container.innerHTML = cmsTestimonials.map((item) => {
+    const stars = Array.from({ length: 5 }, (_, index) => `
+      <i class="fa-solid fa-star${index < Number(item.rating || 5) ? '' : '-half-stroke'}" aria-hidden="true"></i>
+    `).join('');
+    const avatarText = (item.name || 'ST').split(' ').slice(0, 2).map(part => part[0]).join('').toUpperCase().slice(0, 2);
+
+    return `
+      <div class="testimonial-card google-card">
+        <div class="testi-card-top">
+          <div class="testi-header">
+            <div class="testi-avatar" style="background: #1a73e8;">${escapeHtml(avatarText)}</div>
+            <div>
+              <h4 class="reviewer-name">${escapeHtml(item.name)}<i class="fa-solid fa-circle-check verified-icon" title="Verified Student Review"></i></h4>
+              <span class="testi-date"><i class="fa-regular fa-clock"></i> ${escapeHtml(item.designation || 'Verified Student')}</span>
+            </div>
+          </div>
+          <div class="google-corner-badge" title="Verified Student Review"><i class="fa-brands fa-google"></i></div>
+        </div>
+        <div class="testi-stars">${stars}</div>
+        <span class="testi-course-pill">${escapeHtml(item.designation || 'Student Review')}</span>
+        <p class="testi-text">"${escapeHtml(item.message)}"</p>
+        <div class="testi-card-footer">
+          <span class="testi-badge"><i class="fa-solid fa-circle-check"></i> Verified Student</span>
+          <a href="https://g.page/r/Cbr2GCg8dQWrEBM/review" target="_blank" rel="noopener noreferrer" class="google-view-link">
+            <span>Google Review</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return true;
+}
+
 function initContactForm() {
   const form = document.getElementById('enquiryForm');
   const statusMsg = document.getElementById('formStatus');
@@ -491,8 +566,11 @@ function initContactForm() {
       const message = document.getElementById('studentMessage')?.value || '';
 
       if (statusMsg) {
+        const safeName = escapeHtml(name);
+        const safeCourse = escapeHtml(course);
+        const safePhone = escapeHtml(phone);
         statusMsg.innerHTML = `<span style="color: #16a34a; font-weight: bold;">
-          Thank you, ${name}! Your enquiry for ${course} has been noted. Mayur Sir / Sujal Sir will call you shortly on ${phone}.
+          Thank you, ${safeName}! Your enquiry for ${safeCourse} has been noted. Mayur Sir / Sujal Sir will call you shortly on ${safePhone}.
         </span>`;
         statusMsg.style.display = 'block';
       }
@@ -623,6 +701,200 @@ window.showNextGalleryItem = showNextGalleryItem;
 window.closeBannerModal = closeBannerModal;
 window.selectCourse = selectCourse;
 
+window.applyPublicCmsData = function applyPublicCmsData() {
+  if (window.MAYUR_PUBLIC_CONTENT?.getPublishedCourses?.().length) {
+    renderCourses(document.querySelector('.filter-btn.active')?.getAttribute('data-category') || 'all');
+  }
+
+  if (window.MAYUR_PUBLIC_CONTENT?.getPublishedGallery?.().length) {
+    syncGalleryFromCms();
+  }
+
+  updateTestimonialsFromCms();
+  renderTrainersCarousel();
+};
+
+// Trainers Carousel
+let trainersCurrentIndex = 0;
+let trainersInterval = null;
+let trainersPaused = false;
+
+function getTrainersPerView() {
+  const w = window.innerWidth;
+  if (w >= 1024) return 3;
+  if (w >= 640) return 2;
+  return 1;
+}
+
+function renderTrainersCarousel() {
+  const track = document.getElementById('trainersTrack');
+  const dotsContainer = document.getElementById('trainersDots');
+  const emptyMsg = document.getElementById('trainersEmpty');
+  const header = document.getElementById('trainersCarouselHeader');
+  if (!track) return;
+
+  const trainers = (window.MAYUR_PUBLIC_CONTENT?.getPublishedTrainers?.()) || [];
+
+  if (!trainers.length) {
+    track.innerHTML = '';
+    if (dotsContainer) dotsContainer.innerHTML = '';
+    if (emptyMsg) emptyMsg.hidden = false;
+    if (header) header.style.display = 'none';
+    return;
+  }
+
+  if (emptyMsg) emptyMsg.hidden = true;
+  if (header) header.style.display = '';
+
+  trainersCurrentIndex = 0;
+  const perView = getTrainersPerView();
+  const totalPages = Math.max(1, Math.ceil(trainers.length / perView));
+
+  track.innerHTML = trainers.map(function(trainer, i) {
+    const alt = 'Photo of ' + (trainer.name || 'Trainer');
+    return '<div class="trainer-card" data-index="' + i + '">' +
+      '<div class="trainer-card-photo">' +
+        '<img src="' + escapeHtml(trainer.photo_url || '') + '" alt="' + escapeHtml(alt) + '" loading="lazy" />' +
+      '</div>' +
+      '<div class="trainer-card-body">' +
+        '<h4 class="trainer-card-name">' + escapeHtml(trainer.name) + '</h4>' +
+        '<p class="trainer-card-designation">' + escapeHtml(trainer.designation || '') + '</p>' +
+        (trainer.short_description ? '<p class="trainer-card-desc">' + escapeHtml(trainer.short_description) + '</p>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  if (dotsContainer) {
+    dotsContainer.innerHTML = trainers.map(function(_, i) {
+      return '<button type="button" class="trainer-dot' + (i === 0 ? ' active' : '') + '" data-dot="' + i + '" role="tab" aria-label="Go to trainer ' + (i + 1) + '"></button>';
+    }).join('');
+    dotsContainer.querySelectorAll('.trainer-dot').forEach(function(dot) {
+      dot.addEventListener('click', function() {
+        trainersCurrentIndex = parseInt(dot.getAttribute('data-dot'), 10);
+        updateTrainersCarousel();
+        resetTrainersAuto();
+      });
+    });
+  }
+
+  updateTrainersCarousel();
+  startTrainersAuto();
+}
+
+function updateTrainersCarousel() {
+  const track = document.getElementById('trainersTrack');
+  if (!track) return;
+  const perView = getTrainersPerView();
+  const totalPages = Math.max(1, Math.ceil((window.MAYUR_PUBLIC_CONTENT?.getPublishedTrainers?.().length || 1) / perView));
+  if (trainersCurrentIndex >= totalPages) trainersCurrentIndex = 0;
+
+  const cardWidth = track.querySelector('.trainer-card')?.offsetWidth || 0;
+  const gap = 24;
+  const offset = trainersCurrentIndex * (cardWidth + gap) * perView;
+  track.style.transform = 'translateX(-' + offset + 'px)';
+
+  const dots = document.querySelectorAll('.trainer-dot');
+  dots.forEach(function(dot, i) {
+    dot.classList.toggle('active', i === trainersCurrentIndex);
+  });
+
+  const prevBtn = document.getElementById('trainersPrev');
+  const nextBtn = document.getElementById('trainersNext');
+  if (prevBtn) prevBtn.disabled = trainersCurrentIndex === 0;
+  if (nextBtn) nextBtn.disabled = trainersCurrentIndex >= totalPages - 1;
+}
+
+function startTrainersAuto() {
+  stopTrainersAuto();
+  trainersInterval = setInterval(function() {
+    if (!trainersPaused) {
+      const totalPages = Math.max(1, Math.ceil((window.MAYUR_PUBLIC_CONTENT?.getPublishedTrainers?.().length || 1) / getTrainersPerView()));
+      trainersCurrentIndex = (trainersCurrentIndex + 1) % totalPages;
+      updateTrainersCarousel();
+    }
+  }, 6000);
+}
+
+function stopTrainersAuto() {
+  if (trainersInterval) {
+    clearInterval(trainersInterval);
+    trainersInterval = null;
+  }
+}
+
+function resetTrainersAuto() {
+  stopTrainersAuto();
+  startTrainersAuto();
+}
+
+function initTrainersCarouselControls() {
+  const prevBtn = document.getElementById('trainersPrev');
+  const nextBtn = document.getElementById('trainersNext');
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function() {
+      if (trainersCurrentIndex > 0) {
+        trainersCurrentIndex--;
+        updateTrainersCarousel();
+        resetTrainersAuto();
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function() {
+      const totalPages = Math.max(1, Math.ceil((window.MAYUR_PUBLIC_CONTENT?.getPublishedTrainers?.().length || 1) / getTrainersPerView()));
+      if (trainersCurrentIndex < totalPages - 1) {
+        trainersCurrentIndex++;
+        updateTrainersCarousel();
+        resetTrainersAuto();
+      }
+    });
+  }
+
+  const carousel = document.getElementById('trainersCarousel');
+  if (carousel) {
+    carousel.addEventListener('mouseenter', function() { trainersPaused = true; });
+    carousel.addEventListener('mouseleave', function() { trainersPaused = false; });
+  }
+
+  let touchStartX = 0;
+  if (carousel) {
+    carousel.addEventListener('touchstart', function(e) {
+      touchStartX = e.touches[0].clientX;
+      trainersPaused = true;
+    }, { passive: true });
+
+    carousel.addEventListener('touchend', function(e) {
+      const diff = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(diff) > 40) {
+        const totalPages = Math.max(1, Math.ceil((window.MAYUR_PUBLIC_CONTENT?.getPublishedTrainers?.().length || 1) / getTrainersPerView()));
+        if (diff > 0 && trainersCurrentIndex < totalPages - 1) {
+          trainersCurrentIndex++;
+        } else if (diff < 0 && trainersCurrentIndex > 0) {
+          trainersCurrentIndex--;
+        }
+        updateTrainersCarousel();
+      }
+      trainersPaused = false;
+      resetTrainersAuto();
+    }, { passive: true });
+  }
+
+  window.addEventListener('resize', function() {
+    updateTrainersCarousel();
+  });
+}
+
+// Expose globals for inline events
+window.openBannerModal = openBannerModal;
+window.openGalleryModal = openGalleryModal;
+window.showPreviousGalleryItem = showPreviousGalleryItem;
+window.showNextGalleryItem = showNextGalleryItem;
+window.closeBannerModal = closeBannerModal;
+window.selectCourse = selectCourse;
+window.renderTrainersCarousel = renderTrainersCarousel;
+
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
   renderCourses('all');
@@ -633,4 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initContactForm();
   updateDynamicYear();
+  updateTestimonialsFromCms();
+  renderTrainersCarousel();
+  initTrainersCarouselControls();
 });

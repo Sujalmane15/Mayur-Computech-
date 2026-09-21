@@ -11,9 +11,10 @@ export async function requireAdmin(request: Request) {
 
   const { data: admin, error: adminError } = await supabase
     .from('admin_users')
-    .select('user_id')
+    .select('user_id, status')
     .eq('user_id', user.id)
+    .eq('status', 'active')
     .maybeSingle();
-  if (adminError || !admin) throw new Error('Administrator access required');
+  if (adminError || !admin) throw new Error('Active administrator access required');
   return { supabase, user };
 }

@@ -1,0 +1,647 @@
+create extension if not exists pgcrypto;
+
+create table if not exists public.admin_roles (
+  id uuid primary key default gen_random_uuid(),
+  role_name text not null unique,
+  label text not null,
+  description text,
+  is_system boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.admin_permissions (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  module text not null,
+  label text not null,
+  description text,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.role_permissions (
+  role_id uuid not null references public.admin_roles(id) on delete cascade,
+  permission_id uuid not null references public.admin_permissions(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (role_id, permission_id)
+);
+
+create table if not exists public.admin_users (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null unique references auth.users(id) on delete cascade,
+  role_id uuid references public.admin_roles(id) on delete set null,
+  display_name text,
+  email text,
+  status text not null default 'active' check (status in ('active', 'inactive', 'suspended')),
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  last_active_at timestamptz
+);
+
+create table if not exists public.site_settings (
+  id uuid primary key default gen_random_uuid(),
+  key text not null unique,
+  value jsonb not null default '{}',
+  description text,
+  is_public boolean not null default false,
+  created_by uuid references auth.users(id) on delete set null,
+  updated_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.site_sections (
+  id uuid primary key default gen_random_uuid(),
+  section_key text not null,
+  component_type text not null,
+  title text,
+  content jsonb not null default '{}'::jsonb,
+  settings jsonb not null default '{}'::jsonb,
+  sort_order integer not null default 0,
+  status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
+  is_enabled boolean not null default true,
+  created_by uuid references auth.users(id) on delete set null,
+  updated_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.courses (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  title text not null,
+  short_description text not null default '',
+  description text not null default '',
+  category text not null default 'general',
+  duration text,
+  fees text,
+  image_url text,
+  image_path text,
+  features jsonb not null default '[]'::jsonb,
+  eligibility text,
+  syllabus text,
+  status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
+  visibility text not null default 'public' check (visibility in ('public', 'hidden')),
+  is_featured boolean not null default false,
+  sort_order integer not null default 0,
+  created_by uuid references auth.users(id) on delete set null,
+  updated_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.results (
+  id uuid primary key default gen_random_uuid(),
+  student_name text not null,
+  course_name text not null,
+  exam_name text,
+  result_text text,
+  score numeric,
+  percentage numeric,
+  result_year integer,
+  certificate_image_url text,
+  description text,
+  status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
+  visibility text not null default 'public' check (visibility in ('public', 'hidden')),
+  sort_order integer not null default 0,
+  created_by uuid references auth.users(id) on delete set null,
+  updated_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.certificates (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  student_name text,
+  course_name text,
+  event_year integer,
+  image_url text,
+  description text,
+  category text not null default 'general',
+  status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
+  visibility text not null default 'public' check (visibility in ('public', 'hidden')),
+  sort_order integer not null default 0,
+  created_by uuid references auth.users(id) on delete set null,
+  updated_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.achievements (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  description text not null default '',
+  year integer,
+  image_url text,
+  category text not null default 'general',
+  status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
+  visibility text not null default 'public' check (visibility in ('public', 'hidden')),
+  sort_order integer not null default 0,
+  created_by uuid references auth.users(id) on delete set null,
+  updated_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.testimonials (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  designation text,
+  message text not null,
+  rating integer not null default 5 check (rating between 1 and 5),
+  photo_url text,
+  is_featured boolean not null default false,
+  status text not null default 'draft' check (status in ('draft', 'published', 'archived')),
+  visibility text not null default 'public' check (visibility in ('public', 'hidden')),
+  sort_order integer not null default 0,
+  created_by uuid references auth.users(id) on delete set null,
+  updated_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.media_library (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  file_name text not null,
+  mime_type text not null,
+  file_size bigint not null default 0,
+  url text not null,
+  thumbnail_url text,
+  alt_text text,
+  category text not null default 'general',
+  uploaded_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.audit_logs (
+  id uuid primary key default gen_random_uuid(),
+  actor_id uuid references auth.users(id) on delete set null,
+  actor_role text,
+  action text not null,
+  entity_type text not null,
+  entity_id uuid,
+  details jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.content_revisions (
+  id uuid primary key default gen_random_uuid(),
+  entity_type text not null,
+  entity_id uuid not null,
+  revision_number integer not null default 1,
+  payload jsonb not null default '{}'::jsonb,
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists admin_roles_name_idx on public.admin_roles (role_name);
+create index if not exists admin_users_role_idx on public.admin_users (role_id, status);
+create index if not exists site_sections_status_order_idx on public.site_sections (status, is_enabled, sort_order);
+create index if not exists courses_status_visibility_idx on public.courses (status, visibility, sort_order);
+create index if not exists results_status_visibility_idx on public.results (status, visibility, sort_order);
+create index if not exists certificates_status_visibility_idx on public.certificates (status, visibility, sort_order);
+create index if not exists achievements_status_visibility_idx on public.achievements (status, visibility, sort_order);
+create index if not exists testimonials_status_visibility_idx on public.testimonials (status, visibility, sort_order);
+create index if not exists audit_logs_created_at_idx on public.audit_logs (created_at desc);
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+create or replace function public.is_super_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.admin_users au
+    join public.admin_roles ar on ar.id = au.role_id
+    where au.user_id = auth.uid()
+      and au.status = 'active'
+      and ar.role_name = 'SUPER_ADMIN'
+  );
+$$;
+
+create or replace function public.has_role(role_name text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.admin_users au
+    join public.admin_roles ar on ar.id = au.role_id
+    where au.user_id = auth.uid()
+      and au.status = 'active'
+      and ar.role_name = role_name
+  );
+$$;
+
+create or replace function public.has_permission(permission_code text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.admin_users au
+    join public.role_permissions rp on rp.role_id = au.role_id
+    join public.admin_permissions ap on ap.id = rp.permission_id
+    where au.user_id = auth.uid()
+      and au.status = 'active'
+      and ap.code = permission_code
+  );
+$$;
+
+create or replace function public.current_admin_user()
+returns public.admin_users
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select au.*
+  from public.admin_users au
+  where au.user_id = auth.uid()
+    and au.status = 'active'
+  limit 1;
+$$;
+
+create or replace function public.prevent_admin_escalation()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if tg_op = 'INSERT' then
+    if not public.is_super_admin() then
+      raise exception 'Only super admins can create admin records';
+    end if;
+  end if;
+
+  if tg_op = 'UPDATE' then
+    if (old.role_id is distinct from new.role_id
+        or old.status is distinct from new.status)
+      and not public.is_super_admin() then
+      raise exception 'Only super admins can change admin roles or status';
+    end if;
+  end if;
+
+  return new;
+end;
+$$;
+
+-- Seed roles
+insert into public.admin_roles (role_name, label, description, is_system)
+values
+  ('SUPER_ADMIN', 'Super Admin', 'Full platform and CMS control', true),
+  ('CLIENT_ADMIN', 'Client Admin', 'Limited business content administration', true)
+on conflict (role_name) do nothing;
+
+-- Seed permissions
+insert into public.admin_permissions (code, module, label, description)
+values
+  ('dashboard.view', 'dashboard', 'View Dashboard', 'View dashboard overview'),
+  ('gallery.view', 'gallery', 'View Gallery', 'Read gallery items'),
+  ('gallery.create', 'gallery', 'Create Gallery', 'Create gallery items'),
+  ('gallery.update', 'gallery', 'Update Gallery', 'Edit gallery items'),
+  ('gallery.delete', 'gallery', 'Delete Gallery', 'Delete gallery items'),
+  ('gallery.publish', 'gallery', 'Publish Gallery', 'Publish or hide gallery items'),
+  ('courses.view', 'courses', 'View Courses', 'Read courses'),
+  ('courses.create', 'courses', 'Create Courses', 'Create course records'),
+  ('courses.update', 'courses', 'Update Courses', 'Edit course records'),
+  ('courses.delete', 'courses', 'Delete Courses', 'Delete course records'),
+  ('courses.publish', 'courses', 'Publish Courses', 'Publish or hide course records'),
+  ('results.view', 'results', 'View Results', 'Read results'),
+  ('results.create', 'results', 'Create Results', 'Create result records'),
+  ('results.update', 'results', 'Update Results', 'Edit result records'),
+  ('results.delete', 'results', 'Delete Results', 'Delete result records'),
+  ('results.publish', 'results', 'Publish Results', 'Publish or hide result records'),
+  ('certificates.view', 'certificates', 'View Certificates', 'Read certificates'),
+  ('certificates.create', 'certificates', 'Create Certificates', 'Create certificate records'),
+  ('certificates.update', 'certificates', 'Update Certificates', 'Edit certificate records'),
+  ('certificates.delete', 'certificates', 'Delete Certificates', 'Delete certificate records'),
+  ('certificates.publish', 'certificates', 'Publish Certificates', 'Publish or hide certificate records'),
+  ('achievements.view', 'achievements', 'View Achievements', 'Read achievements'),
+  ('achievements.create', 'achievements', 'Create Achievements', 'Create achievement records'),
+  ('achievements.update', 'achievements', 'Update Achievements', 'Edit achievement records'),
+  ('achievements.delete', 'achievements', 'Delete Achievements', 'Delete achievement records'),
+  ('achievements.publish', 'achievements', 'Publish Achievements', 'Publish or hide achievement records'),
+  ('testimonials.view', 'testimonials', 'View Testimonials', 'Read testimonials'),
+  ('testimonials.create', 'testimonials', 'Create Testimonials', 'Create testimonial records'),
+  ('testimonials.update', 'testimonials', 'Update Testimonials', 'Edit testimonial records'),
+  ('testimonials.delete', 'testimonials', 'Delete Testimonials', 'Delete testimonial records'),
+  ('testimonials.publish', 'testimonials', 'Publish Testimonials', 'Publish or hide testimonial records'),
+  ('media.view', 'media', 'View Media', 'Read media library'),
+  ('media.upload', 'media', 'Upload Media', 'Upload media files'),
+  ('media.update', 'media', 'Update Media', 'Edit media records'),
+  ('media.delete', 'media', 'Delete Media', 'Delete media items'),
+  ('website.view', 'website', 'View Website', 'View website configuration'),
+  ('website.update', 'website', 'Update Website', 'Update website content and configuration'),
+  ('sections.view', 'sections', 'View Sections', 'Read website sections'),
+  ('sections.create', 'sections', 'Create Sections', 'Create website sections'),
+  ('sections.update', 'sections', 'Update Sections', 'Edit website sections'),
+  ('sections.delete', 'sections', 'Delete Sections', 'Delete website sections'),
+  ('sections.reorder', 'sections', 'Reorder Sections', 'Reorder website sections'),
+  ('sections.publish', 'sections', 'Publish Sections', 'Publish or hide website sections'),
+  ('navigation.view', 'navigation', 'View Navigation', 'Read navigation items'),
+  ('navigation.update', 'navigation', 'Update Navigation', 'Edit navigation items'),
+  ('seo.view', 'seo', 'View SEO', 'Read SEO metadata'),
+  ('seo.update', 'seo', 'Update SEO', 'Edit SEO metadata'),
+  ('settings.view', 'settings', 'View Settings', 'Read system settings'),
+  ('settings.update', 'settings', 'Update Settings', 'Edit system settings'),
+  ('admins.view', 'admins', 'View Admins', 'Read admin users'),
+  ('admins.create', 'admins', 'Create Admins', 'Create admin users'),
+  ('admins.update', 'admins', 'Update Admins', 'Edit admin users'),
+  ('admins.delete', 'admins', 'Delete Admins', 'Delete admin users'),
+  ('admins.deactivate', 'admins', 'Deactivate Admins', 'Deactivate admin users'),
+  ('permissions.view', 'permissions', 'View Permissions', 'Read permissions'),
+  ('permissions.update', 'permissions', 'Update Permissions', 'Change permissions'),
+  ('audit.view', 'audit', 'View Audit Logs', 'Read audit logs'),
+  ('system.view', 'system', 'View System', 'View advanced system settings'),
+  ('system.update', 'system', 'Update System', 'Edit advanced system settings')
+on conflict (code) do nothing;
+
+insert into public.role_permissions (role_id, permission_id)
+select ar.id, ap.id
+from public.admin_roles ar
+join public.admin_permissions ap on ap.code in (
+  'dashboard.view',
+  'gallery.view', 'gallery.create', 'gallery.update', 'gallery.delete', 'gallery.publish',
+  'courses.view', 'courses.create', 'courses.update', 'courses.delete', 'courses.publish',
+  'results.view', 'results.create', 'results.update', 'results.delete', 'results.publish',
+  'certificates.view', 'certificates.create', 'certificates.update', 'certificates.delete', 'certificates.publish',
+  'achievements.view', 'achievements.create', 'achievements.update', 'achievements.delete', 'achievements.publish',
+  'testimonials.view', 'testimonials.create', 'testimonials.update', 'testimonials.delete', 'testimonials.publish',
+  'media.view', 'media.upload', 'media.update', 'media.delete',
+  'website.view', 'website.update',
+  'sections.view', 'sections.create', 'sections.update', 'sections.delete', 'sections.reorder', 'sections.publish',
+  'navigation.view', 'navigation.update',
+  'seo.view', 'seo.update',
+  'settings.view', 'settings.update',
+  'admins.view', 'admins.create', 'admins.update', 'admins.delete', 'admins.deactivate',
+  'permissions.view', 'permissions.update',
+  'audit.view',
+  'system.view', 'system.update'
+)
+where ar.role_name = 'SUPER_ADMIN'
+on conflict do nothing;
+
+insert into public.role_permissions (role_id, permission_id)
+select ar.id, ap.id
+from public.admin_roles ar
+join public.admin_permissions ap on ap.code in (
+  'dashboard.view',
+  'gallery.view', 'gallery.create', 'gallery.update', 'gallery.delete', 'gallery.publish',
+  'courses.view', 'courses.create', 'courses.update', 'courses.delete', 'courses.publish',
+  'results.view', 'results.create', 'results.update', 'results.delete', 'results.publish',
+  'certificates.view', 'certificates.create', 'certificates.update', 'certificates.delete', 'certificates.publish',
+  'achievements.view', 'achievements.create', 'achievements.update', 'achievements.delete', 'achievements.publish',
+  'testimonials.view', 'testimonials.create', 'testimonials.update', 'testimonials.delete', 'testimonials.publish',
+  'media.view', 'media.upload', 'media.update', 'media.delete'
+)
+where ar.role_name = 'CLIENT_ADMIN'
+on conflict do nothing;
+
+-- Harden existing table metadata
+alter table public.admin_users
+  add column if not exists role_id uuid references public.admin_roles(id) on delete set null,
+  add column if not exists display_name text,
+  add column if not exists email text,
+  add column if not exists status text not null default 'active' check (status in ('active', 'inactive', 'suspended')),
+  add column if not exists created_by uuid references auth.users(id) on delete set null,
+  add column if not exists updated_at timestamptz not null default now(),
+  add column if not exists last_active_at timestamptz;
+
+alter table public.gallery_items
+  add column if not exists created_by uuid references auth.users(id) on delete set null,
+  add column if not exists updated_at timestamptz not null default now();
+
+create trigger if not exists admin_users_updated_at
+before update on public.admin_users
+for each row execute function public.set_updated_at();
+
+create trigger if not exists gallery_items_updated_at
+before update on public.gallery_items
+for each row execute function public.set_updated_at();
+
+create trigger if not exists site_settings_updated_at
+before update on public.site_settings
+for each row execute function public.set_updated_at();
+
+create trigger if not exists site_sections_updated_at
+before update on public.site_sections
+for each row execute function public.set_updated_at();
+
+create trigger if not exists courses_updated_at
+before update on public.courses
+for each row execute function public.set_updated_at();
+
+create trigger if not exists results_updated_at
+before update on public.results
+for each row execute function public.set_updated_at();
+
+create trigger if not exists certificates_updated_at
+before update on public.certificates
+for each row execute function public.set_updated_at();
+
+create trigger if not exists achievements_updated_at
+before update on public.achievements
+for each row execute function public.set_updated_at();
+
+create trigger if not exists testimonials_updated_at
+before update on public.testimonials
+for each row execute function public.set_updated_at();
+
+create trigger if not exists media_library_updated_at
+before update on public.media_library
+for each row execute function public.set_updated_at();
+
+create trigger if not exists admin_users_escalation_guard
+before insert or update on public.admin_users
+for each row execute function public.prevent_admin_escalation();
+
+alter table public.admin_roles enable row level security;
+alter table public.admin_permissions enable row level security;
+alter table public.role_permissions enable row level security;
+alter table public.admin_users enable row level security;
+alter table public.site_settings enable row level security;
+alter table public.site_sections enable row level security;
+alter table public.courses enable row level security;
+alter table public.results enable row level security;
+alter table public.certificates enable row level security;
+alter table public.achievements enable row level security;
+alter table public.testimonials enable row level security;
+alter table public.media_library enable row level security;
+alter table public.audit_logs enable row level security;
+alter table public.content_revisions enable row level security;
+
+create policy if not exists "Super admins can manage roles"
+  on public.admin_roles for all
+  using (public.is_super_admin())
+  with check (public.is_super_admin());
+
+create policy if not exists "Super admins can manage permissions"
+  on public.admin_permissions for all
+  using (public.is_super_admin())
+  with check (public.is_super_admin());
+
+create policy if not exists "Super admins can manage role permissions"
+  on public.role_permissions for all
+  using (public.is_super_admin())
+  with check (public.is_super_admin());
+
+create policy if not exists "Admins can view own profile"
+  on public.admin_users for select
+  using (user_id = auth.uid() or public.is_super_admin());
+
+create policy if not exists "Super admins can manage admin users"
+  on public.admin_users for all
+  using (public.is_super_admin())
+  with check (public.is_super_admin());
+
+create policy if not exists "Admins with settings view can read settings"
+  on public.site_settings for select
+  using (public.has_permission('settings.view'));
+
+create policy if not exists "Admins with settings update can manage settings"
+  on public.site_settings for all
+  using (public.has_permission('settings.update'))
+  with check (public.has_permission('settings.update'));
+
+create policy if not exists "Admins with website view can read sections"
+  on public.site_sections for select
+  using (public.has_permission('sections.view') or public.has_permission('website.view'));
+
+create policy if not exists "Admins with sections management can manage sections"
+  on public.site_sections for all
+  using (public.has_permission('sections.update') or public.has_permission('sections.create') or public.has_permission('sections.delete') or public.has_permission('sections.publish'))
+  with check (public.has_permission('sections.update') or public.has_permission('sections.create') or public.has_permission('sections.delete') or public.has_permission('sections.publish'));
+
+create policy if not exists "Admins with courses view can read courses"
+  on public.courses for select
+  using (public.has_permission('courses.view'));
+
+create policy if not exists "Admins with courses management can manage courses"
+  on public.courses for all
+  using (public.has_permission('courses.update') or public.has_permission('courses.create') or public.has_permission('courses.delete') or public.has_permission('courses.publish'))
+  with check (public.has_permission('courses.update') or public.has_permission('courses.create') or public.has_permission('courses.delete') or public.has_permission('courses.publish'));
+
+create policy if not exists "Admins with results view can read results"
+  on public.results for select
+  using (public.has_permission('results.view'));
+
+create policy if not exists "Admins with results management can manage results"
+  on public.results for all
+  using (public.has_permission('results.update') or public.has_permission('results.create') or public.has_permission('results.delete') or public.has_permission('results.publish'))
+  with check (public.has_permission('results.update') or public.has_permission('results.create') or public.has_permission('results.delete') or public.has_permission('results.publish'));
+
+create policy if not exists "Admins with certificates view can read certificates"
+  on public.certificates for select
+  using (public.has_permission('certificates.view'));
+
+create policy if not exists "Admins with certificates management can manage certificates"
+  on public.certificates for all
+  using (public.has_permission('certificates.update') or public.has_permission('certificates.create') or public.has_permission('certificates.delete') or public.has_permission('certificates.publish'))
+  with check (public.has_permission('certificates.update') or public.has_permission('certificates.create') or public.has_permission('certificates.delete') or public.has_permission('certificates.publish'));
+
+create policy if not exists "Admins with achievements view can read achievements"
+  on public.achievements for select
+  using (public.has_permission('achievements.view'));
+
+create policy if not exists "Admins with achievements management can manage achievements"
+  on public.achievements for all
+  using (public.has_permission('achievements.update') or public.has_permission('achievements.create') or public.has_permission('achievements.delete') or public.has_permission('achievements.publish'))
+  with check (public.has_permission('achievements.update') or public.has_permission('achievements.create') or public.has_permission('achievements.delete') or public.has_permission('achievements.publish'));
+
+create policy if not exists "Admins with testimonials view can read testimonials"
+  on public.testimonials for select
+  using (public.has_permission('testimonials.view'));
+
+create policy if not exists "Admins with testimonials management can manage testimonials"
+  on public.testimonials for all
+  using (public.has_permission('testimonials.update') or public.has_permission('testimonials.create') or public.has_permission('testimonials.delete') or public.has_permission('testimonials.publish'))
+  with check (public.has_permission('testimonials.update') or public.has_permission('testimonials.create') or public.has_permission('testimonials.delete') or public.has_permission('testimonials.publish'));
+
+create policy if not exists "Admins with media view can read media"
+  on public.media_library for select
+  using (public.has_permission('media.view'));
+
+create policy if not exists "Admins with media management can manage media"
+  on public.media_library for all
+  using (public.has_permission('media.update') or public.has_permission('media.upload') or public.has_permission('media.delete'))
+  with check (public.has_permission('media.update') or public.has_permission('media.upload') or public.has_permission('media.delete'));
+
+create policy if not exists "Admins with audit view can read audit logs"
+  on public.audit_logs for select
+  using (public.has_permission('audit.view'));
+
+create policy if not exists "Admins with system access can manage revisions"
+  on public.content_revisions for all
+  using (public.has_permission('sections.update') or public.has_permission('website.update') or public.has_permission('settings.update'))
+  with check (public.has_permission('sections.update') or public.has_permission('website.update') or public.has_permission('settings.update'));
+
+create policy if not exists "Public can read published gallery only"
+  on public.gallery_items for select
+  using (is_published = true or public.is_super_admin() or public.has_permission('gallery.view'));
+
+create policy if not exists "Admins can insert gallery"
+  on public.gallery_items for insert
+  with check (public.is_super_admin() or public.has_permission('gallery.create'));
+
+create policy if not exists "Admins can update gallery"
+  on public.gallery_items for update
+  using (public.is_super_admin() or public.has_permission('gallery.update'))
+  with check (public.is_super_admin() or public.has_permission('gallery.update'));
+
+create policy if not exists "Admins can delete gallery"
+  on public.gallery_items for delete
+  using (public.is_super_admin() or public.has_permission('gallery.delete'));
+
+create or replace function public.log_audit_event(
+  p_action text,
+  p_entity_type text,
+  p_entity_id uuid,
+  p_details jsonb default '{}'::jsonb
+)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  insert into public.audit_logs (actor_id, actor_role, action, entity_type, entity_id, details)
+  values (
+    auth.uid(),
+    coalesce((select ar.role_name from public.admin_users au join public.admin_roles ar on ar.id = au.role_id where au.user_id = auth.uid() limit 1), 'public'),
+    p_action,
+    p_entity_type,
+    p_entity_id,
+    p_details
+  );
+$$;
+
+comment on function public.is_super_admin is 'Returns true when the current authenticated user is a system super admin.';
+comment on function public.has_permission is 'Checks whether the current user has a specific admin permission.';
+comment on function public.current_admin_user is 'Returns the active admin user record for the current authenticated user.';
+
+-- Ensure a first admin user may be associated after sign-up. This creates the security boundary for subsequent admin access.
+-- Example: insert into public.admin_users (user_id, role_id, display_name, email, status, created_by)
+-- select auth.uid(), (select id from public.admin_roles where role_name = 'SUPER_ADMIN'), 'Admin Name', 'admin@example.com', 'active', auth.uid();
