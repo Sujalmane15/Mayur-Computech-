@@ -146,7 +146,7 @@ const coursesData = [
     title: 'Marathi Typing (CCTP) 30 WPM',
     category: 'beginner',
     duration: '2–3 Months',
-    subtitle: 'Govt. Certified CCTP / GCC-TBC Speed Training',
+    subtitle: 'Govt. Certified CCTP ',
     icon: '⌨️',
     image: 'marathi-typing-banner.jpg',
     badge: 'CCTP 30 WPM Govt. Valid',
@@ -155,7 +155,7 @@ const coursesData = [
       'Daily Speed & Accuracy Practice (30 WPM)',
       'Official Govt. Letter & Statement Formatting',
       'Speed Passage & Timed Typing Software',
-      'Govt. GCC-TBC / CCTP Exam Readiness'
+    
     ]
   },
   {
@@ -163,7 +163,7 @@ const coursesData = [
     title: 'ENGLISH TYPING (CCTP) 30/40 WPM',
     category: 'beginner',
     duration: '2–3 Months',
-    subtitle: 'Govt. Certified CCTP / GCC-TBC Speed Training',
+    subtitle: 'Govt. Certified CCTP ',
     icon: '⌨️',
     image: 'english-typing-banner.jpg',
     badge: 'CCTP 30/40 WPM Valid',
@@ -171,8 +171,7 @@ const coursesData = [
       'Touch Typing & Home Row Finger Techniques',
       'Daily Speed Building (30 WPM & 40 WPM)',
       'Business Letters & Statement Formatting',
-      'Timed Passage Tests & Error Analysis',
-      'GCC-TBC / CCTP Govt. Exam Preparation'
+      'Timed Passge Tests & Error Analysis',
     ]
   },
   {
