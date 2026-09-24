@@ -3331,3 +3331,411 @@ body {
     font-size: 12px !important;
   }
 }
+
+/* =========================================================
+   SIDE DEVELOPER WIDGET
+   ========================================================= */
+
+.side-developer-widget {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  font-family: inherit;
+}
+
+/* Vertical Developer Label */
+.side-developer-label {
+  width: 38px;
+  min-height: 125px;
+  background: #064fa3;
+  color: #ffffff;
+  border-radius: 14px 0 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -4px 6px 20px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.side-developer-label span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+/* Developer Card */
+.side-developer-card {
+  width: 245px;
+  background: #ffffff;
+  border: 1px solid #dce7f3;
+  border-right: none;
+  border-radius: 16px 0 0 16px;
+  padding: 12px;
+  box-shadow: -8px 8px 30px rgba(0, 45, 90, 0.16);
+  overflow: hidden;
+}
+
+/* Each Developer */
+.side-developer-profile {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  animation: developerSlideIn 0.45s ease;
+}
+
+.side-developer-profile.active {
+  display: flex;
+}
+
+/* Developer Image */
+.side-developer-profile img {
+  width: 70px;
+  height: 70px;
+  flex: 0 0 70px;
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: center top;
+  border: 2px solid #e8f0f8;
+  background: #f4f8fc;
+}
+
+/* Developer Information */
+.side-developer-info {
+  min-width: 0;
+}
+
+.side-developer-info h4 {
+  margin: 0 0 3px;
+  color: #06458f;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.side-developer-info span {
+  display: block;
+  color: #1768b5;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.side-developer-info p {
+  margin: 0;
+  color: #64748b;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+/* Animation */
+@keyframes developerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(25px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .side-developer-card {
+    width: 215px;
+  }
+
+  .side-developer-profile img {
+    width: 60px;
+    height: 60px;
+    flex-basis: 60px;
+  }
+
+  .side-developer-info h4 {
+    font-size: 14px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .side-developer-label {
+    width: 32px;
+    min-height: 105px;
+  }
+
+  .side-developer-label span {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+  }
+
+  .side-developer-card {
+    width: 190px;
+    padding: 9px;
+  }
+
+  .side-developer-profile {
+    gap: 9px;
+  }
+
+  .side-developer-profile img {
+    width: 52px;
+    height: 52px;
+    flex-basis: 52px;
+    border-radius: 9px;
+  }
+
+  .side-developer-info h4 {
+    font-size: 13px;
+  }
+
+  .side-developer-info span {
+    font-size: 9px;
+  }
+
+  .side-developer-info p {
+    font-size: 9px;
+  }
+}
+
+/* =========================================================
+   SIDE DEVELOPER BUTTON + CLICK TO OPEN
+   ========================================================= */
+
+.side-developer-widget {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  font-family: inherit;
+}
+
+/* DEVELOPER button */
+.side-developer-label {
+  width: 42px;
+  height: 130px;
+  background: #064fa3;
+  color: #fff;
+  border-radius: 14px 0 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -4px 6px 20px rgba(0, 0, 0, 0.18);
+  transition: 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.side-developer-label:hover {
+  background: #003f88;
+}
+
+.side-developer-label span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+/* Developer card hidden by default */
+.side-developer-card {
+  width: 270px;
+  background: #fff;
+  border: 1px solid #dce7f3;
+  border-right: none;
+  border-radius: 16px 0 0 16px;
+  padding: 12px;
+  box-shadow: -8px 8px 30px rgba(0, 45, 90, 0.18);
+
+  display: none;
+  margin-right: 0;
+}
+
+/* Open state */
+.side-developer-widget.open .side-developer-card {
+  display: block;
+}
+
+/* Developer profile */
+.side-developer-profile {
+  display: none;
+  align-items: center;
+  gap: 12px;
+}
+
+.side-developer-profile.active {
+  display: flex;
+  animation: developerSlideIn 0.4s ease;
+}
+
+.side-developer-profile img {
+  width: 70px;
+  height: 70px;
+  flex: 0 0 70px;
+  border-radius: 12px;
+  object-fit: cover;
+  object-position: center top;
+  border: 2px solid #e8f0f8;
+  background: #f4f8fc;
+}
+
+.side-developer-info {
+  min-width: 0;
+}
+
+.side-developer-info h4 {
+  margin: 0 0 3px;
+  color: #06458f;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.side-developer-info span {
+  display: block;
+  color: #1768b5;
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.side-developer-info p {
+  margin: 0;
+  color: #64748b;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+@keyframes developerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+
+  .side-developer-label {
+    width: 34px;
+    height: 105px;
+  }
+
+  .side-developer-label span {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+  }
+
+  .side-developer-card {
+    width: 205px;
+    padding: 9px;
+  }
+
+  .side-developer-profile {
+    gap: 9px;
+  }
+
+  .side-developer-profile img {
+    width: 52px;
+    height: 52px;
+    flex-basis: 52px;
+    border-radius: 9px;
+  }
+
+  .side-developer-info h4 {
+    font-size: 13px;
+  }
+
+  .side-developer-info span {
+    font-size: 9px;
+  }
+
+  .side-developer-info p {
+    font-size: 9px;
+  }
+}
+
+/* =========================================================
+   FLOATING SOCIAL BUTTONS
+   ========================================================= */
+
+.floating-social {
+  position: fixed;
+  right: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 27px;
+  z-index: 9998;
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.20);
+  transition: transform 0.25s ease;
+}
+
+/* Instagram */
+.floating-instagram {
+  bottom: 195px;
+  background: #e1306c;
+}
+
+/* YouTube */
+.floating-youtube {
+  bottom: 125px;
+  background: #ff0000;
+}
+
+/* WhatsApp */
+.floating-whatsapp {
+  right: 0 !important;
+  bottom: 55px !important;
+}
+
+/* Hover */
+.floating-social:hover,
+.floating-whatsapp:hover {
+  transform: scale(1.08);
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+
+  .floating-social {
+    right: 0;
+    width: 52px;
+    height: 52px;
+    font-size: 24px;
+  }
+
+  .floating-instagram {
+    bottom: 175px;
+  }
+
+  .floating-youtube {
+    bottom: 112px;
+  }
+
+  .floating-whatsapp {
+    right: 0 !important;
+    bottom: 50px !important;
+  }
+}

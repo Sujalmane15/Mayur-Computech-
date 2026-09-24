@@ -908,3 +908,66 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTrainersCarousel();
   initTrainersCarouselControls();
 });
+/* =========================================================
+   SIDE DEVELOPER AUTO SLIDER
+   Changes developer every 3 seconds
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const developerProfiles = document.querySelectorAll(
+    ".side-developer-profile"
+  );
+
+  if (!developerProfiles.length) return;
+
+  let currentDeveloper = 0;
+
+  setInterval(function () {
+
+    // Current developer hide
+    developerProfiles[currentDeveloper].classList.remove("active");
+
+    // Next developer
+    currentDeveloper =
+      (currentDeveloper + 1) % developerProfiles.length;
+
+    // Next developer show
+    developerProfiles[currentDeveloper].classList.add("active");
+
+  }, 3000);
+
+});
+/* =========================================================
+   SIDE DEVELOPER BUTTON + 10 SECOND AUTO CHANGE
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const widget = document.getElementById("sideDeveloperWidget");
+  const label = widget?.querySelector(".side-developer-label");
+  const profiles = widget?.querySelectorAll(".side-developer-profile");
+
+  if (!widget || !label || !profiles.length) return;
+
+  let currentDeveloper = 0;
+
+  /* Open / Close developer card */
+  label.addEventListener("click", function () {
+    widget.classList.toggle("open");
+  });
+
+  /* Change developer every 10 seconds */
+  setInterval(function () {
+
+    profiles[currentDeveloper].classList.remove("active");
+
+    currentDeveloper =
+      (currentDeveloper + 1) % profiles.length;
+
+    profiles[currentDeveloper].classList.add("active");
+
+  }, 10000);
+
+});
+
